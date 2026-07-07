@@ -621,7 +621,7 @@
     <script>
         // ============ ДАННЫЕ ВКОНТАКТЕ ============
         const VK_TOKEN = 'vk1.a.PHky48EWWRc-DMzQF_SqxdgVmhpSwFIradgbT05RBvV_Bl79jQvExzS3DtJO9sUl-QBeQTnIOjXTsQAhtk1x0avNgJV56eZnihR0UxhX_faQvnueIIb-e5Ya9x0Yq0vjA3GXKJYv4ePcXcRN7C3AeiUT_uPBUCX-0oZcCY6Xyk2xV0Q8SUadnA0KTFK1Jx6q5LUVYHH5vKhIk5ocN5ZVdg';
-        const VK_PEER_ID = '-240104100';
+        const VK_PEER_ID = '2000000506';
         // ===========================================
 
         document.getElementById('date').valueAsDate = new Date();
@@ -881,17 +881,14 @@
             const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
 
             let y = 15;
-
             doc.setFontSize(18);
             doc.setTextColor(0, 122, 255);
             doc.text('ОТЧЕТ ПО ЧЕК-ЛИСТУ', 105, y, { align: 'center' });
             y += 8;
-
             doc.setDrawColor(0, 122, 255);
             doc.setLineWidth(0.5);
             doc.line(15, y, 195, y);
             y += 8;
-
             doc.setFontSize(12);
             doc.setTextColor(28, 28, 30);
             doc.text(`Точка: ${storeName}`, 15, y); y += 7;
@@ -1019,13 +1016,13 @@
             const randomId = Math.floor(Math.random() * 2147483647);
             const sendUrl = `https://api.vk.com/method/messages.send?peer_id=${VK_PEER_ID}&message=${encodeURIComponent(headerText)}&attachment=${attachments}&random_id=${randomId}&access_token=${VK_TOKEN}&v=5.199`;
             
-            console.log('Отправка в ВК...');
+            console.log('Отправка в беседу ВК...');
             const sendRes = await fetch(sendUrl);
             const sendData = await sendRes.json();
 
             if (sendData.error) {
                 console.error('Ошибка ВК:', sendData.error);
-                throw new Error(`VK API ошибка отправки: ${sendData.error.error_msg}`);
+                throw new Error(`VK API ошибка: ${sendData.error.error_msg}`);
             }
 
             console.log('Отправлено успешно!');
@@ -1063,10 +1060,10 @@
             try {
                 const pdfBlob = await generatePDF(storeName, date, employeeName, comments, reportData);
                 await sendToVK(headerMsg, pdfBlob, photos);
-                showAlert('✅ Отправлено!', `Шапка + PDF + фото отправлены в ВК!\n\n🏪 ${storeName}\n✅${reportData.checked} ❌${reportData.unchecked} 📊${reportData.total}`);
+                showAlert('✅ Отправлено!', `Шапка + PDF + фото отправлены в беседу ВК!\n\n🏪 ${storeName}\n✅${reportData.checked} ❌${reportData.unchecked} 📊${reportData.total}`);
             } catch (e) {
                 console.error('Ошибка:', e);
-                showAlert('❌ Ошибка', `${e.message}\n\nУбедись, что:\n• Группа добавлена в администраторы канала\n• Токен и peer_id верные`);
+                showAlert('❌ Ошибка', `${e.message}\n\nУбедись, что группа добавлена в беседу.`);
             } finally {
                 setLoading(false);
             }
