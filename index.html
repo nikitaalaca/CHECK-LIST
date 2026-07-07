@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Чек-лист смены</title>
-    <!-- Подключаем библиотеку для PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
@@ -620,9 +619,9 @@
     </div>
 
     <script>
-        // ============ НАСТРОЙКИ TELEGRAM ============
-        const BOT_TOKEN = '8920306780:AAHSc7YbrF7nqiT9aSD59_31Fq-j8MKy4n0';
-        const CHAT_ID = '-1004308183842';
+        // ============ ДАННЫЕ ВКОНТАКТЕ ============
+        const VK_TOKEN = 'vk1.a.PHky48EWWRc-DMzQF_SqxdgVmhpSwFIradgbT05RBvV_Bl79jQvExzS3DtJO9sUl-QBeQTnIOjXTsQAhtk1x0avNgJV56eZnihR0UxhX_faQvnueIIb-e5Ya9x0Yq0vjA3GXKJYv4ePcXcRN7C3AeiUT_uPBUCX-0oZcCY6Xyk2xV0Q8SUadnA0KTFK1Jx6q5LUVYHH5vKhIk5ocN5ZVdg';
+        const VK_PEER_ID = '-240104100';
         // ===========================================
 
         document.getElementById('date').valueAsDate = new Date();
@@ -734,7 +733,6 @@
 
                 items.forEach((item, index) => {
                     const itemId = `${containerId}-${section}-${index}`;
-
                     const div = document.createElement('div');
                     div.className = 'checklist-item';
                     div.setAttribute('data-item-id', itemId);
@@ -766,9 +764,7 @@
         function markItem(itemId, status) {
             const item = document.querySelector(`[data-item-id="${itemId}"]`);
             const reasonInput = document.getElementById(`reason-${itemId}`);
-
             item.classList.remove('checked', 'unchecked');
-
             if (status === 'yes') {
                 item.classList.add('checked');
                 reasonInput.classList.remove('show');
@@ -779,7 +775,6 @@
                 setTimeout(() => reasonInput.querySelector('input').focus(), 100);
                 if (!itemReasons[itemId]) itemReasons[itemId] = '';
             }
-
             updateCounter();
         }
 
@@ -850,7 +845,6 @@
             const activeSection = currentMode === 'opening' ? 'opening-section' : 'closing-section';
             const items = document.querySelectorAll(`#${activeSection} .checklist-item`);
             const headers = document.querySelectorAll(`#${activeSection} .checklist-section-title`);
-
             let checked = 0, unchecked = 0;
             let sections = [];
             let currentSec = null;
@@ -869,7 +863,6 @@
                 const reason = itemReasons[id] || '';
                 if (isChecked) checked++;
                 if (isUnchecked) unchecked++;
-
                 for (let j = headers.length - 1; j >= 0; j--) {
                     if (headers[j].compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING) {
                         secIdx = j; break;
@@ -880,31 +873,25 @@
                 }
             });
             if (currentSec) sections.push(currentSec);
-
             return { sections, checked, unchecked, total: items.length };
         }
 
-        // Генерация PDF через jsPDF
         async function generatePDF(storeName, date, employeeName, comments, reportData) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
 
-            // Поддержка кириллицы — используем встроенный шрифт
             let y = 15;
 
-            // Заголовок
             doc.setFontSize(18);
             doc.setTextColor(0, 122, 255);
             doc.text('ОТЧЕТ ПО ЧЕК-ЛИСТУ', 105, y, { align: 'center' });
             y += 8;
 
-            // Линия
             doc.setDrawColor(0, 122, 255);
             doc.setLineWidth(0.5);
             doc.line(15, y, 195, y);
             y += 8;
 
-            // Информация
             doc.setFontSize(12);
             doc.setTextColor(28, 28, 30);
             doc.text(`Точка: ${storeName}`, 15, y); y += 7;
@@ -914,48 +901,24 @@
             doc.text(`Выполнено: ${reportData.checked} | Не выполнено: ${reportData.unchecked} | Всего: ${reportData.total}`, 15, y);
             y += 10;
 
-            // Секции
             reportData.sections.forEach(sec => {
-                // Проверяем, нужна ли новая страница
-                if (y > 260) {
-                    doc.addPage();
-                    y = 15;
-                }
-
+                if (y > 260) { doc.addPage(); y = 15; }
                 doc.setFontSize(13);
                 doc.setTextColor(0, 122, 255);
                 doc.text(sec.title, 15, y);
                 y += 7;
-
                 sec.items.forEach(it => {
-                    if (y > 270) {
-                        doc.addPage();
-                        y = 15;
-                    }
-
+                    if (y > 270) { doc.addPage(); y = 15; }
                     let icon = it.isChecked ? '[V]' : (it.isUnchecked ? '[X]' : '[ ]');
                     let text = `${icon} ${it.text}`;
-                    if (it.isUnchecked && it.reason) {
-                        text += ` — Причина: ${it.reason}`;
-                    }
-
+                    if (it.isUnchecked && it.reason) text += ` - Причина: ${it.reason}`;
                     doc.setFontSize(10);
-                    if (it.isChecked) {
-                        doc.setTextColor(52, 199, 89);
-                    } else if (it.isUnchecked) {
-                        doc.setTextColor(255, 59, 48);
-                    } else {
-                        doc.setTextColor(142, 142, 147);
-                    }
-
-                    // Разбиваем длинный текст на строки
-                    const maxWidth = 175;
-                    const lines = doc.splitTextToSize(text, maxWidth);
+                    if (it.isChecked) doc.setTextColor(52, 199, 89);
+                    else if (it.isUnchecked) doc.setTextColor(255, 59, 48);
+                    else doc.setTextColor(142, 142, 147);
+                    const lines = doc.splitTextToSize(text, 175);
                     lines.forEach(line => {
-                        if (y > 275) {
-                            doc.addPage();
-                            y = 15;
-                        }
+                        if (y > 275) { doc.addPage(); y = 15; }
                         doc.text(line, 18, y);
                         y += 5;
                     });
@@ -964,12 +927,8 @@
                 y += 4;
             });
 
-            // Комментарий
             if (comments) {
-                if (y > 250) {
-                    doc.addPage();
-                    y = 15;
-                }
+                if (y > 250) { doc.addPage(); y = 15; }
                 y += 4;
                 doc.setFontSize(12);
                 doc.setTextColor(28, 28, 30);
@@ -978,82 +937,99 @@
                 doc.setTextColor(99, 99, 102);
                 const commentLines = doc.splitTextToSize(comments, 175);
                 commentLines.forEach(line => {
-                    if (y > 275) {
-                        doc.addPage();
-                        y = 15;
-                    }
+                    if (y > 275) { doc.addPage(); y = 15; }
                     doc.text(line, 18, y);
                     y += 5;
                 });
             }
 
-            // Подвал
             doc.setFontSize(8);
             doc.setTextColor(142, 142, 147);
             doc.text('EGORKIN DEV', 105, 288, { align: 'center' });
 
-            // Возвращаем PDF как Blob
             return doc.output('blob');
         }
 
-        async function sendToTelegram(headerText, pdfBlob, photoFiles) {
-            // 1. Отправляем шапку (краткое сообщение)
-            const textUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-            const textRes = await fetch(textUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: CHAT_ID,
-                    text: headerText,
-                    parse_mode: 'HTML'
-                })
-            });
-
-            if (!textRes.ok) {
-                const err = await textRes.json();
-                throw new Error(err.description || 'Ошибка отправки сообщения');
+        async function uploadFileToVK(file, filename) {
+            const uploadUrlRes = await fetch(`https://api.vk.com/method/docs.getMessagesUploadServer?type=doc&peer_id=${VK_PEER_ID}&access_token=${VK_TOKEN}&v=5.199`);
+            const uploadUrlData = await uploadUrlRes.json();
+            
+            if (uploadUrlData.error) {
+                throw new Error(`VK API ошибка: ${uploadUrlData.error.error_msg}`);
             }
 
-            // 2. Отправляем PDF
             const formData = new FormData();
-            formData.append('chat_id', CHAT_ID);
-            formData.append('document', pdfBlob, 'checklist_report.pdf');
-            formData.append('caption', '📎 Полный чек-лист в PDF');
+            formData.append('file', file, filename);
+            const uploadRes = await fetch(uploadUrlData.response.upload_url, { method: 'POST', body: formData });
+            const uploadData = await uploadRes.json();
 
-            const docRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
-                method: 'POST',
-                body: formData
-            });
+            const saveRes = await fetch(`https://api.vk.com/method/docs.save?file=${uploadData.file}&access_token=${VK_TOKEN}&v=5.199`);
+            const saveData = await saveRes.json();
 
-            if (!docRes.ok) {
-                const err = await docRes.json();
-                console.warn('Ошибка отправки PDF:', err.description);
+            if (saveData.error) {
+                throw new Error(`VK API ошибка сохранения: ${saveData.error.error_msg}`);
             }
 
-            // 3. Отправляем фото (если есть)
+            return `doc${saveData.response.doc.owner_id}_${saveData.response.doc.id}`;
+        }
+
+        async function uploadPhotoToVK(file) {
+            const uploadUrlRes = await fetch(`https://api.vk.com/method/photos.getMessagesUploadServer?peer_id=${VK_PEER_ID}&access_token=${VK_TOKEN}&v=5.199`);
+            const uploadUrlData = await uploadUrlRes.json();
+
+            if (uploadUrlData.error) {
+                throw new Error(`VK API ошибка: ${uploadUrlData.error.error_msg}`);
+            }
+
+            const formData = new FormData();
+            formData.append('photo', file);
+            const uploadRes = await fetch(uploadUrlData.response.upload_url, { method: 'POST', body: formData });
+            const uploadData = await uploadRes.json();
+
+            const saveRes = await fetch(`https://api.vk.com/method/photos.saveMessagesPhoto?photo=${uploadData.photo}&server=${uploadData.server}&hash=${uploadData.hash}&access_token=${VK_TOKEN}&v=5.199`);
+            const saveData = await saveRes.json();
+
+            if (saveData.error) {
+                throw new Error(`VK API ошибка сохранения фото: ${saveData.error.error_msg}`);
+            }
+
+            return `photo${saveData.response[0].owner_id}_${saveData.response[0].id}`;
+        }
+
+        async function sendToVK(headerText, pdfBlob, photoFiles) {
+            const pdfAttachment = await uploadFileToVK(pdfBlob, 'checklist_report.pdf');
+
+            let photoAttachments = '';
             if (photoFiles && photoFiles.length > 0) {
                 for (const photo of photoFiles) {
-                    const fd = new FormData();
-                    fd.append('chat_id', CHAT_ID);
-                    fd.append('photo', photo);
-
-                    const photoRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-                        method: 'POST',
-                        body: fd
-                    });
-
-                    if (!photoRes.ok) {
-                        const errData = await photoRes.json();
-                        console.warn('Ошибка отправки фото:', errData.description);
+                    try {
+                        const photoId = await uploadPhotoToVK(photo);
+                        photoAttachments += (photoAttachments ? ',' : '') + photoId;
+                    } catch (e) {
+                        console.warn('Ошибка загрузки фото:', e);
                     }
                 }
             }
 
-            return true;
-        }
+            let attachments = pdfAttachment;
+            if (photoAttachments) {
+                attachments += ',' + photoAttachments;
+            }
 
-        function esc(s) {
-            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            const randomId = Math.floor(Math.random() * 2147483647);
+            const sendUrl = `https://api.vk.com/method/messages.send?peer_id=${VK_PEER_ID}&message=${encodeURIComponent(headerText)}&attachment=${attachments}&random_id=${randomId}&access_token=${VK_TOKEN}&v=5.199`;
+            
+            console.log('Отправка в ВК...');
+            const sendRes = await fetch(sendUrl);
+            const sendData = await sendRes.json();
+
+            if (sendData.error) {
+                console.error('Ошибка ВК:', sendData.error);
+                throw new Error(`VK API ошибка отправки: ${sendData.error.error_msg}`);
+            }
+
+            console.log('Отправлено успешно!');
+            return sendData;
         }
 
         async function generateReport() {
@@ -1069,34 +1045,28 @@
 
             const reportData = collectReportData();
 
-            // Шапка для Telegram (краткая)
-            let headerMsg = `<b>📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ</b>\n\n`;
-            headerMsg += `<b>🏪 Точка:</b> ${esc(storeName)}\n`;
-            headerMsg += `<b>📅 Дата:</b> ${esc(date)}\n`;
-            headerMsg += `<b>👤 Сотрудник:</b> ${esc(employeeName)}\n`;
-            headerMsg += `<b>🕐 Режим:</b> ${currentMode === 'opening' ? 'Открытие' : 'Закрытие'}\n`;
-            headerMsg += `<b>📊 Статистика:</b>\n`;
+            let headerMsg = `📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ\n\n`;
+            headerMsg += `🏪 Точка: ${storeName}\n`;
+            headerMsg += `📅 Дата: ${date}\n`;
+            headerMsg += `👤 Сотрудник: ${employeeName}\n`;
+            headerMsg += `🕐 Режим: ${currentMode === 'opening' ? 'Открытие' : 'Закрытие'}\n`;
+            headerMsg += `📊 Статистика:\n`;
             headerMsg += `✅ Выполнено: ${reportData.checked}\n`;
             headerMsg += `❌ Не выполнено: ${reportData.unchecked}\n`;
             headerMsg += `📋 Всего пунктов: ${reportData.total}\n`;
-            
             if (comments) {
-                headerMsg += `\n<b>💬 Комментарий:</b> ${esc(comments)}\n`;
+                headerMsg += `\n💬 Комментарий: ${comments}\n`;
             }
-            
-            headerMsg += `\n📎 <i>Полный чек-лист в PDF-файле ниже</i>`;
+            headerMsg += `\n📎 Полный чек-лист в PDF-файле ниже`;
 
             setLoading(true);
             try {
-                // Генерируем PDF
                 const pdfBlob = await generatePDF(storeName, date, employeeName, comments, reportData);
-                
-                // Отправляем в Telegram
-                await sendToTelegram(headerMsg, pdfBlob, photos);
-                
-                showAlert('✅ Отправлено!', `Шапка + PDF + фото отправлены в канал!\n\n🏪 ${storeName}\n✅${reportData.checked} ❌${reportData.unchecked} 📊${reportData.total}`);
+                await sendToVK(headerMsg, pdfBlob, photos);
+                showAlert('✅ Отправлено!', `Шапка + PDF + фото отправлены в ВК!\n\n🏪 ${storeName}\n✅${reportData.checked} ❌${reportData.unchecked} 📊${reportData.total}`);
             } catch (e) {
-                showAlert('❌ Ошибка', `${e.message}`);
+                console.error('Ошибка:', e);
+                showAlert('❌ Ошибка', `${e.message}\n\nУбедись, что:\n• Группа добавлена в администраторы канала\n• Токен и peer_id верные`);
             } finally {
                 setLoading(false);
             }
