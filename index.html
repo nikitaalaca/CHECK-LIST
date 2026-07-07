@@ -2,9 +2,9 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Чек-лист смены</title>
-    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.72);
@@ -12,13 +12,11 @@
             --gray: #8E8E93; --text: #1C1C1E; --text-secondary: #636366;
             --radius: 14px; --radius-lg: 18px;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
             background: linear-gradient(180deg, #E8ECF1 0%, #F2F2F7 30%, #E8ECF1 100%);
             min-height: 100vh; color: var(--text); -webkit-font-smoothing: antialiased;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
         }
         .bg-decoration {
             position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.5; pointer-events: none; z-index: 0;
@@ -41,7 +39,6 @@
             width: 100%; height: 46px; padding: 0 14px; background: rgba(242,242,247,0.8);
             border: 1px solid rgba(0,0,0,0.06); border-radius: var(--radius);
             font-size: 16px; font-family: inherit; color: var(--text); outline: none;
-            -webkit-appearance: none;
         }
         .input-group textarea { height: auto; min-height: 80px; padding: 12px 14px; resize: vertical; }
         .segmented-control { display: flex; background: rgba(0,0,0,0.04); border-radius: 11px; padding: 3px; margin-bottom: 14px; }
@@ -84,8 +81,19 @@
         .reason-input input {
             width: 100%; height: 40px; padding: 0 12px; background: rgba(255,255,255,0.8);
             border: 1px solid rgba(255,59,48,0.2); border-radius: 10px;
-            font-size: 14px; font-family: inherit; outline: none; -webkit-appearance: none;
+            font-size: 14px; font-family: inherit; outline: none;
         }
+        .photo-card {
+            background: var(--glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1.5px dashed rgba(0,0,0,0.1); border-radius: var(--radius-lg);
+            padding: 22px; text-align: center; cursor: pointer; margin-bottom: 14px;
+        }
+        .photo-card .photo-icon { font-size: 30px; margin-bottom: 4px; }
+        .photo-card .photo-label { font-size: 15px; font-weight: 500; color: var(--blue); }
+        .photo-card .photo-hint { font-size: 12px; color: var(--gray); margin-top: 2px; }
+        .photo-card input[type="file"] { display: none; }
+        .photo-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .photo-preview img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; }
         .submit-btn {
             width: 100%; height: 52px; background: var(--blue); color: white;
             border: none; border-radius: var(--radius); font-size: 17px; font-weight: 600;
@@ -165,6 +173,14 @@
             </div>
         </div>
 
+        <div class="photo-card" onclick="document.getElementById('photoInput').click()">
+            <div class="photo-icon">📸</div>
+            <div class="photo-label">Добавить фото</div>
+            <div class="photo-hint">Можно выбрать несколько</div>
+            <input type="file" id="photoInput" multiple accept="image/*" onchange="handlePhotos(event)">
+            <div class="photo-preview" id="photoPreview"></div>
+        </div>
+
         <button class="submit-btn" id="submitBtn" onclick="generateReport()">
             <span id="submitText">📤 Отправить отчет</span>
             <div class="loader"></div>
@@ -183,16 +199,9 @@
     </div>
 
     <script>
-        // Инициализация VK Mini App
-        if (window.vkBridge) {
-            vkBridge.send('VKWebAppInit');
-        }
-
-        const VK_TOKEN = 'vk1.a.40bEW7iBt5YEOUPBaURUA2FQBw-9B1l_kysYkrGWU2D2iEjYlxmn6ywxBWtCB_-P6rmawSvHdnc6Vwbb-L6VRhBKSc-ggJLtXGHG5mjUrZPWif_8yK7ZcCVAfyQEk97w5ZPorGItAtSrFt9MVIZrDT7DGbBAzRhMFSWhHV4xicA5hCHayOX93_FUuMQ1PKLB83uvLTYu9OlF0Iiofi1i0Q';
-        const VK_PEER_ID = '2000000003';
-
         document.getElementById('date').valueAsDate = new Date();
         let currentMode = 'opening';
+        let photos = [];
         let itemReasons = {};
 
         const openingChecklist = {
@@ -338,6 +347,25 @@
             updateCounter();
         }
 
+        function handlePhotos(event) {
+            const files = event.target.files;
+            const preview = document.getElementById('photoPreview');
+            preview.innerHTML = '';
+            photos = [];
+            for (let file of files) {
+                if (file.type.startsWith('image/')) {
+                    photos.push(file);
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        preview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+
         function showAlert(title, message) {
             document.getElementById('alertTitle').textContent = title;
             document.getElementById('alertMessage').textContent = message;
@@ -372,31 +400,74 @@
             return { sections, checked, unchecked, total: items.length };
         }
 
-        function buildFullReport(storeName, date, employeeName, comments, data) {
-            const mode = currentMode === 'opening' ? 'Открытие смены' : 'Закрытие смены';
-            let msg = `📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ\n\n🏪 ${storeName}\n📅 ${date}\n👤 ${employeeName}\n🕐 ${mode}\n\n📊 СТАТИСТИКА:\n✅ ${data.checked}\n❌ ${data.unchecked}\n📋 ${data.total}\n\n📝 ДЕТАЛИ:\n`;
+        // Генерация PDF
+        async function generatePDF(storeName, date, employeeName, comments, data) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+            let y = 15;
+            doc.setFontSize(18); doc.setTextColor(0, 122, 255);
+            doc.text('ОТЧЕТ ПО ЧЕК-ЛИСТУ', 105, y, { align: 'center' }); y += 8;
+            doc.line(15, y, 195, y); y += 8;
+            doc.setFontSize(12); doc.setTextColor(28, 28, 30);
+            doc.text(`Точка: ${storeName}`, 15, y); y += 7;
+            doc.text(`Дата: ${date}`, 15, y); y += 7;
+            doc.text(`Сотрудник: ${employeeName}`, 15, y); y += 7;
+            doc.text(`Режим: ${currentMode==='opening'?'Открытие':'Закрытие'}`, 15, y); y += 7;
+            doc.text(`Выполнено: ${data.checked} | Не выполнено: ${data.unchecked} | Всего: ${data.total}`, 15, y); y += 10;
+
             data.sections.forEach(sec => {
-                msg += `\n📌 ${sec.title}:\n`;
+                if (y > 260) { doc.addPage(); y = 15; }
+                doc.setFontSize(13); doc.setTextColor(0, 122, 255);
+                doc.text(sec.title, 15, y); y += 7;
                 sec.items.forEach(it => {
-                    let icon = '⬜'; if (it.isChecked) icon = '✅'; if (it.isUnchecked) icon = '❌';
-                    msg += `${icon} ${it.text}${it.isUnchecked&&it.reason?' — '+it.reason:''}\n`;
+                    if (y > 270) { doc.addPage(); y = 15; }
+                    let icon = it.isChecked ? '[V]' : (it.isUnchecked ? '[X]' : '[ ]');
+                    let text = `${icon} ${it.text}`;
+                    if (it.isUnchecked && it.reason) text += ` - ${it.reason}`;
+                    doc.setFontSize(10);
+                    doc.setTextColor(it.isChecked ? 52 : (it.isUnchecked ? 255 : 142), it.isChecked ? 199 : (it.isUnchecked ? 59 : 142), it.isChecked ? 89 : (it.isUnchecked ? 48 : 147));
+                    doc.splitTextToSize(text, 175).forEach(line => {
+                        if (y > 275) { doc.addPage(); y = 15; }
+                        doc.text(line, 18, y); y += 5;
+                    });
+                    y += 1;
                 });
+                y += 4;
             });
-            if (comments) msg += `\n💬 ${comments}\n`;
-            msg += `\nEGORKIN DEV`;
-            return msg;
+
+            if (comments) {
+                if (y > 250) { doc.addPage(); y = 15; }
+                y += 4; doc.setFontSize(12); doc.setTextColor(28, 28, 30);
+                doc.text('Комментарий:', 15, y); y += 7;
+                doc.setFontSize(10); doc.setTextColor(99, 99, 102);
+                doc.text(comments, 18, y, { maxWidth: 175 });
+            }
+            doc.setFontSize(8); doc.setTextColor(142, 142, 147);
+            doc.text('EGORKIN DEV', 105, 288, { align: 'center' });
+            return doc.output('blob');
         }
 
-        function sendToVK(text) {
-            const max = 4000, msgs = [];
-            let r = text;
-            while (r.length > 0) { msgs.push(r.substring(0, max)); r = r.substring(max); }
-            msgs.forEach((msg, i) => {
-                setTimeout(() => {
-                    const rid = Math.floor(Math.random() * 2147483647);
-                    new Image().src = `https://api.vk.com/method/messages.send?peer_id=${VK_PEER_ID}&message=${encodeURIComponent(msg)}&random_id=${rid}&access_token=${VK_TOKEN}&v=5.199`;
-                }, i * 500);
+        // Отправка через сервер Netlify
+        async function sendReport(header, pdfBlob, photos) {
+            const formData = new FormData();
+            formData.append('message', header);
+            formData.append('pdf', pdfBlob, 'report.pdf');
+            
+            for (let i = 0; i < photos.length; i++) {
+                formData.append('photos', photos[i]);
+            }
+
+            const response = await fetch('/api/send-report', {
+                method: 'POST',
+                body: formData
             });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Ошибка отправки');
+            }
+
+            return response.json();
         }
 
         async function generateReport() {
@@ -404,12 +475,47 @@
             const date = document.getElementById('date').value;
             const employeeName = document.getElementById('employeeName').value.trim();
             const comments = document.getElementById('comments').value.trim();
-            if (!storeName || !date || !employeeName) { showAlert('⚠️ Заполните все поля', ''); return; }
+
+            if (!storeName || !date || !employeeName) {
+                showAlert('⚠️ Заполните все поля', '');
+                return;
+            }
+
             const data = collectReportData();
-            const report = buildFullReport(storeName, date, employeeName, comments, data);
+            const mode = currentMode === 'opening' ? 'Открытие' : 'Закрытие';
+            
+            let header = `📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ\n\n🏪 ${storeName}\n📅 ${date}\n👤 ${employeeName}\n🕐 ${mode}\n✅ ${data.checked} | ❌ ${data.unchecked} | 📊 ${data.total}`;
+            if (comments) header += `\n💬 ${comments}`;
+            header += `\n\nEGORKIN DEV`;
+
             setLoading(true);
-            sendToVK(report);
-            setTimeout(() => { setLoading(false); showAlert('✅ Отправлено!', `🏪 ${storeName}\n✅${data.checked} ❌${data.unchecked} 📊${data.total}`); }, 1500);
+            try {
+                const pdfBlob = await generatePDF(storeName, date, employeeName, comments, data);
+                await sendReport(header, pdfBlob, photos);
+                setLoading(false);
+                showAlert('✅ Отправлено!', `PDF + фото в беседу!\n🏪 ${storeName}\n✅${data.checked} ❌${data.unchecked} 📊${data.total}`);
+            } catch (e) {
+                console.error(e);
+                // Fallback — текст через Image()
+                let fullText = header + '\n\n📝 ДЕТАЛИ:\n';
+                data.sections.forEach(sec => {
+                    fullText += `\n📌 ${sec.title}:\n`;
+                    sec.items.forEach(it => {
+                        let icon = '⬜'; if (it.isChecked) icon = '✅'; if (it.isUnchecked) icon = '❌';
+                        fullText += `${icon} ${it.text}${it.isUnchecked&&it.reason?' — '+it.reason:''}\n`;
+                    });
+                });
+                const msgs = [];
+                let r = fullText;
+                while (r.length > 0) { msgs.push(r.substring(0, 4000)); r = r.substring(4000); }
+                msgs.forEach((msg, i) => {
+                    setTimeout(() => {
+                        new Image().src = `https://api.vk.com/method/messages.send?peer_id=2000000003&message=${encodeURIComponent(msg)}&random_id=${Math.floor(Math.random()*2147483647)}&access_token=vk1.a.40bEW7iBt5YEOUPBaURUA2FQBw-9B1l_kysYkrGWU2D2iEjYlxmn6ywxBWtCB_-P6rmawSvHdnc6Vwbb-L6VRhBKSc-ggJLtXGHG5mjUrZPWif_8yK7ZcCVAfyQEk97w5ZPorGItAtSrFt9MVIZrDT7DGbBAzRhMFSWhHV4xicA5hCHayOX93_FUuMQ1PKLB83uvLTYu9OlF0Iiofi1i0Q&v=5.199`;
+                    }, i * 500);
+                });
+                setLoading(false);
+                showAlert('⚠️ Отправлен текст', 'Сервер недоступен.\nТекст отправлен напрямую.');
+            }
         }
 
         renderChecklist(openingChecklist, 'opening-section');
