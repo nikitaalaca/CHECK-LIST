@@ -1,0 +1,6 @@
+{
+  "name": "checklist-bot",
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  }
+}
