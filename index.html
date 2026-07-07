@@ -2,510 +2,135 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Чек-лист смены</title>
+    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.72);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --blue: #007AFF;
-            --green: #34C759;
-            --red: #FF3B30;
-            --gray: #8E8E93;
-            --text: #1C1C1E;
-            --text-secondary: #636366;
-            --radius: 14px;
-            --radius-lg: 18px;
-            --transition: 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+            --blue: #007AFF; --green: #34C759; --red: #FF3B30;
+            --gray: #8E8E93; --text: #1C1C1E; --text-secondary: #636366;
+            --radius: 14px; --radius-lg: 18px;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
             background: linear-gradient(180deg, #E8ECF1 0%, #F2F2F7 30%, #E8ECF1 100%);
-            min-height: 100vh;
-            padding: 0;
-            color: var(--text);
-            -webkit-font-smoothing: antialiased;
+            min-height: 100vh; color: var(--text); -webkit-font-smoothing: antialiased;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
         }
-
         .bg-decoration {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.5;
-            pointer-events: none;
-            z-index: 0;
+            position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.5; pointer-events: none; z-index: 0;
         }
-        .bg-decoration:nth-child(1) {
-            width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(0,122,255,0.25) 0%, transparent 70%);
-            top: -80px; right: -60px;
-        }
-        .bg-decoration:nth-child(2) {
-            width: 250px; height: 250px;
-            background: radial-gradient(circle, rgba(52,199,89,0.2) 0%, transparent 70%);
-            bottom: 10%; left: -70px;
-        }
-        .bg-decoration:nth-child(3) {
-            width: 200px; height: 200px;
-            background: radial-gradient(circle, rgba(255,149,0,0.15) 0%, transparent 70%);
-            top: 40%; left: 50%; transform: translateX(-50%);
-        }
-
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 12px 16px 40px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .header {
-            text-align: center;
-            padding: 24px 0 10px;
-        }
-        .header-icon {
-            font-size: 40px;
-            margin-bottom: 4px;
-            animation: float 3s ease-in-out infinite;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
-        }
-        .header h1 {
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            color: var(--text);
-        }
-        .header .subtitle {
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-weight: 500;
-            margin-top: 2px;
-        }
-
+        .bg-decoration:nth-child(1) { width: 300px; height: 300px; background: radial-gradient(circle, rgba(0,122,255,0.25) 0%, transparent 70%); top: -80px; right: -60px; }
+        .bg-decoration:nth-child(2) { width: 250px; height: 250px; background: radial-gradient(circle, rgba(52,199,89,0.2) 0%, transparent 70%); bottom: 10%; left: -70px; }
+        .container { max-width: 500px; margin: 0 auto; padding: 12px 16px 40px; position: relative; z-index: 1; }
+        .header { text-align: center; padding: 24px 0 10px; }
+        .header h1 { font-size: 26px; font-weight: 700; }
+        .header .subtitle { font-size: 14px; color: var(--gray); margin-top: 4px; }
         .card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            background: var(--glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255,255,255,0.5); border-radius: var(--radius-lg);
+            padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.04);
         }
-
-        .card-title {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--gray);
-            margin-bottom: 14px;
-        }
-
-        .input-group {
-            margin-bottom: 12px;
-        }
-        .input-group:last-child {
-            margin-bottom: 0;
-        }
-        .input-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            margin-bottom: 5px;
-            padding-left: 1px;
-        }
-        .input-group input,
-        .input-group textarea {
-            width: 100%;
-            height: 46px;
-            padding: 0 14px;
-            background: rgba(242, 242, 247, 0.8);
-            border: 1px solid rgba(0,0,0,0.06);
-            border-radius: var(--radius);
-            font-size: 16px;
-            font-family: inherit;
-            color: var(--text);
-            transition: all var(--transition);
-            outline: none;
-            -webkit-user-select: text;
-            user-select: text;
-            line-height: 46px;
-        }
-        .input-group textarea {
-            height: auto;
-            min-height: 80px;
-            padding: 12px 14px;
-            line-height: 1.4;
-            resize: vertical;
-        }
-        .input-group input[type="date"] {
-            height: 46px;
-            padding: 0 14px;
-            font-size: 16px;
-            line-height: 46px;
+        .card-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray); margin-bottom: 14px; }
+        .input-group { margin-bottom: 12px; }
+        .input-group label { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 5px; display: block; }
+        .input-group input, .input-group textarea {
+            width: 100%; height: 46px; padding: 0 14px; background: rgba(242,242,247,0.8);
+            border: 1px solid rgba(0,0,0,0.06); border-radius: var(--radius);
+            font-size: 16px; font-family: inherit; color: var(--text); outline: none;
             -webkit-appearance: none;
-            appearance: none;
         }
-        .input-group input:focus,
-        .input-group textarea:focus {
-            background: rgba(255,255,255,0.95);
-            border-color: var(--blue);
-            box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
-        }
-
-        .segmented-control {
-            display: flex;
-            background: rgba(0,0,0,0.04);
-            border-radius: 11px;
-            padding: 3px;
-            margin-bottom: 14px;
-        }
+        .input-group textarea { height: auto; min-height: 80px; padding: 12px 14px; resize: vertical; }
+        .segmented-control { display: flex; background: rgba(0,0,0,0.04); border-radius: 11px; padding: 3px; margin-bottom: 14px; }
         .segmented-btn {
-            flex: 1;
-            padding: 11px 10px;
-            border: none;
-            background: transparent;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            border-radius: 9px;
-            cursor: pointer;
-            transition: all var(--transition);
-            font-family: inherit;
+            flex: 1; padding: 11px; border: none; background: transparent;
+            font-size: 14px; font-weight: 600; color: var(--text-secondary);
+            border-radius: 9px; cursor: pointer; font-family: inherit;
         }
-        .segmented-btn.active {
-            background: white;
-            color: var(--text);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-
-        .section {
-            display: none;
-            animation: fadeSlideIn 0.3s ease;
-        }
-        .section.active {
-            display: block;
-        }
-        @keyframes fadeSlideIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .checklist-section-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text);
-            margin: 14px 0 8px;
-            padding-left: 1px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .checklist-section-title::before {
-            content: '';
-            width: 3px;
-            height: 16px;
-            background: var(--blue);
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-
+        .segmented-btn.active { background: white; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .section { display: none; }
+        .section.active { display: block; }
+        .checklist-section-title { font-size: 14px; font-weight: 600; margin: 14px 0 8px; padding-left: 6px; border-left: 3px solid var(--blue); }
         .checklist-item {
-            background: rgba(255,255,255,0.55);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.6);
-            border-radius: var(--radius);
-            margin-bottom: 6px;
-            overflow: hidden;
-            transition: all var(--transition);
+            background: rgba(255,255,255,0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.6); border-radius: var(--radius); margin-bottom: 6px; overflow: hidden;
         }
-        .checklist-item.checked {
-            background: rgba(52,199,89,0.08);
-            border-color: rgba(52,199,89,0.2);
-        }
-        .checklist-item.unchecked {
-            background: rgba(255,59,48,0.06);
-            border-color: rgba(255,59,48,0.18);
-        }
-
-        .checklist-item-main {
-            display: flex;
-            align-items: center;
-            padding: 13px 14px;
-            gap: 11px;
-        }
-
+        .checklist-item.checked { background: rgba(52,199,89,0.08); border-color: rgba(52,199,89,0.2); }
+        .checklist-item.unchecked { background: rgba(255,59,48,0.06); border-color: rgba(255,59,48,0.18); }
+        .checklist-item-main { display: flex; align-items: center; padding: 13px 14px; gap: 11px; }
         .checkbox-custom {
-            width: 22px;
-            height: 22px;
-            border-radius: 7px;
-            border: 2px solid #C7C7CC;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            background: white;
+            width: 22px; height: 22px; border-radius: 7px; border: 2px solid #C7C7CC;
+            flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: white;
         }
-        .checklist-item.checked .checkbox-custom {
-            background: var(--green);
-            border-color: var(--green);
-            animation: pop 0.25s ease;
-        }
-        .checklist-item.unchecked .checkbox-custom {
-            background: var(--red);
-            border-color: var(--red);
-            animation: pop 0.25s ease;
-        }
-        @keyframes pop {
-            0% { transform: scale(0.75); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        .checkbox-custom .icon-check,
-        .checkbox-custom .icon-cross {
-            display: none;
-        }
-        .checklist-item.checked .checkbox-custom .icon-check {
-            display: block;
-        }
-        .checklist-item.unchecked .checkbox-custom .icon-cross {
-            display: block;
-        }
-
-        .item-text {
-            flex: 1;
-            font-size: 15px;
-            line-height: 1.3;
-            color: var(--text);
-        }
-        .checklist-item.checked .item-text {
-            color: #8E8E93;
-        }
-
-        .item-actions {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
+        .checklist-item.checked .checkbox-custom { background: var(--green); border-color: var(--green); }
+        .checklist-item.unchecked .checkbox-custom { background: var(--red); border-color: var(--red); }
+        .checkbox-custom svg { display: none; }
+        .checklist-item.checked .icon-check { display: block; }
+        .checklist-item.unchecked .icon-cross { display: block; }
+        .item-text { flex: 1; font-size: 15px; line-height: 1.3; }
+        .item-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .action-btn {
-            width: 34px;
-            height: 34px;
-            border-radius: 9px;
-            border: 1.5px solid rgba(0,0,0,0.08);
-            background: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 15px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-            font-family: inherit;
+            width: 34px; height: 34px; border-radius: 9px; border: 1.5px solid rgba(0,0,0,0.08);
+            background: white; cursor: pointer; font-size: 15px; font-weight: 600;
+            font-family: inherit; display: flex; align-items: center; justify-content: center;
         }
-        .action-btn:active {
-            transform: scale(0.92);
-        }
-        .btn-yes {
-            border-color: rgba(52,199,89,0.3);
-            color: var(--green);
-        }
-        .btn-no {
-            border-color: rgba(255,59,48,0.3);
-            color: var(--red);
-        }
-
-        .reason-input {
-            display: none;
-            padding: 0 14px 14px 47px;
-        }
-        .reason-input.show {
-            display: block;
-            animation: fadeSlideIn 0.25s ease;
-        }
+        .btn-yes { border-color: rgba(52,199,89,0.3); color: var(--green); }
+        .btn-no { border-color: rgba(255,59,48,0.3); color: var(--red); }
+        .reason-input { display: none; padding: 0 14px 14px 47px; }
+        .reason-input.show { display: block; }
         .reason-input input {
-            width: 100%;
-            height: 40px;
-            padding: 0 12px;
-            background: rgba(255,255,255,0.8);
-            border: 1px solid rgba(255,59,48,0.2);
-            border-radius: 10px;
-            font-size: 14px;
-            font-family: inherit;
-            color: var(--text);
-            outline: none;
-            -webkit-user-select: text;
-            user-select: text;
+            width: 100%; height: 40px; padding: 0 12px; background: rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,59,48,0.2); border-radius: 10px;
+            font-size: 14px; font-family: inherit; outline: none; -webkit-appearance: none;
         }
-        .reason-input input:focus {
-            border-color: var(--red);
-            box-shadow: 0 0 0 3px rgba(255,59,48,0.08);
-        }
-        .reason-input input::placeholder {
-            color: #C7C7CC;
-            font-size: 13px;
-        }
-
         .submit-btn {
-            width: 100%;
-            height: 52px;
-            background: var(--blue);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 17px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all var(--transition);
-            box-shadow: 0 4px 16px rgba(0,122,255,0.25);
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
+            width: 100%; height: 52px; background: var(--blue); color: white;
+            border: none; border-radius: var(--radius); font-size: 17px; font-weight: 600;
+            cursor: pointer; box-shadow: 0 4px 16px rgba(0,122,255,0.25);
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            font-family: inherit; margin-top: 6px;
         }
-        .submit-btn:active {
-            transform: scale(0.97);
-        }
-        .submit-btn.loading {
-            pointer-events: none;
-            opacity: 0.8;
-        }
+        .submit-btn.loading { opacity: 0.7; }
         .loader {
-            display: none;
-            width: 18px;
-            height: 18px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            margin-left: 6px;
+            display: none; width: 18px; height: 18px;
+            border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+            border-radius: 50%; animation: spin 0.7s linear infinite;
         }
-        .submit-btn.loading .loader {
-            display: inline-block;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .counter {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--gray);
-        }
-        .counter .dot {
-            display: inline-block;
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--green);
-            margin-right: 5px;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
-        .footer {
-            text-align: center;
-            padding: 20px 0 8px;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--gray);
-            letter-spacing: 1.5px;
-        }
-        .footer span {
-            background: rgba(0,0,0,0.03);
-            padding: 7px 18px;
-            border-radius: 20px;
-        }
-
+        .submit-btn.loading .loader { display: inline-block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .counter { text-align: center; margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--gray); }
+        .footer { text-align: center; padding: 16px 0 8px; font-size: 11px; font-weight: 600; color: var(--gray); letter-spacing: 1.5px; }
+        .footer span { background: rgba(0,0,0,0.03); padding: 7px 18px; border-radius: 20px; }
         .ios-alert-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(6px);
+            z-index: 1000; display: none; align-items: center; justify-content: center;
         }
-        .ios-alert-overlay.show {
-            display: flex;
-        }
+        .ios-alert-overlay.show { display: flex; }
         .ios-alert {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-radius: 20px;
-            padding: 24px 20px;
-            width: 85%;
-            max-width: 350px;
-            text-align: center;
+            background: rgba(255,255,255,0.95); border-radius: 20px;
+            padding: 24px 20px; width: 85%; max-width: 350px; text-align: center;
             box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-            animation: alertIn 0.3s ease;
         }
-        @keyframes alertIn {
-            from { transform: scale(0.85); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        .ios-alert h3 {
-            font-size: 18px;
-            margin-bottom: 6px;
-        }
-        .ios-alert p {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 18px;
-            line-height: 1.4;
-            white-space: pre-wrap;
-        }
+        .ios-alert h3 { font-size: 18px; margin-bottom: 6px; }
+        .ios-alert p { font-size: 14px; color: var(--text-secondary); margin-bottom: 18px; white-space: pre-wrap; }
         .ios-alert button {
-            width: 100%;
-            height: 44px;
-            background: var(--blue);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
+            width: 100%; height: 44px; background: var(--blue); color: white;
+            border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
+            font-family: inherit; cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="bg-decoration"></div>
     <div class="bg-decoration"></div>
-    <div class="bg-decoration"></div>
 
     <div class="container">
         <div class="header">
-            <div class="header-icon">📋</div>
-            <h1>Чек-лист смены</h1>
+            <h1>📋 Чек-лист смены</h1>
             <div class="subtitle">Открытие и закрытие торговой точки</div>
         </div>
 
@@ -533,10 +158,10 @@
         <div id="opening-section" class="section active"></div>
         <div id="closing-section" class="section"></div>
 
-        <div class="card" style="margin-top: 12px;">
+        <div class="card">
             <div class="card-title">💬 Комментарий</div>
             <div class="input-group">
-                <textarea id="comments" rows="2" placeholder="Оставьте комментарий для следующей смены..."></textarea>
+                <textarea id="comments" rows="2" placeholder="Оставьте комментарий..."></textarea>
             </div>
         </div>
 
@@ -545,14 +170,8 @@
             <div class="loader"></div>
         </button>
 
-        <div class="counter" id="counter">
-            <span class="dot"></span>
-            <span id="counterText">Выполнено: 0 из 0</span>
-        </div>
-
-        <div class="footer">
-            <span>EGORKIN DEV</span>
-        </div>
+        <div class="counter">✅ <span id="counterText">0 из 0</span></div>
+        <div class="footer"><span>EGORKIN DEV</span></div>
     </div>
 
     <div class="ios-alert-overlay" id="alertOverlay">
@@ -564,11 +183,15 @@
     </div>
 
     <script>
-        const VK_TOKEN = 'vk1.a.PHky48EWWRc-DMzQF_SqxdgVmhpSwFIradgbT05RBvV_Bl79jQvExzS3DtJO9sUl-QBeQTnIOjXTsQAhtk1x0avNgJV56eZnihR0UxhX_faQvnueIIb-e5Ya9x0Yq0vjA3GXKJYv4ePcXcRN7C3AeiUT_uPBUCX-0oZcCY6Xyk2xV0Q8SUadnA0KTFK1Jx6q5LUVYHH5vKhIk5ocN5ZVdg';
-        const VK_PEER_ID = '141629419';
+        // Инициализация VK Mini App
+        if (window.vkBridge) {
+            vkBridge.send('VKWebAppInit');
+        }
+
+        const VK_TOKEN = 'vk1.a.40bEW7iBt5YEOUPBaURUA2FQBw-9B1l_kysYkrGWU2D2iEjYlxmn6ywxBWtCB_-P6rmawSvHdnc6Vwbb-L6VRhBKSc-ggJLtXGHG5mjUrZPWif_8yK7ZcCVAfyQEk97w5ZPorGItAtSrFt9MVIZrDT7DGbBAzRhMFSWhHV4xicA5hCHayOX93_FUuMQ1PKLB83uvLTYu9OlF0Iiofi1i0Q';
+        const VK_PEER_ID = '2000000003';
 
         document.getElementById('date').valueAsDate = new Date();
-
         let currentMode = 'opening';
         let itemReasons = {};
 
@@ -579,12 +202,10 @@
                 "Внешние стеклянные элементы — чистые, без разводов и следов"
             ],
             "Интерьер — чистота и порядок": [
-                "Пол чистый",
-                "Столы и иное оборудование чистые и протертые",
+                "Пол чистый", "Столы и оборудование чистые и протертые",
                 "Выкладка соответствует рекомендациям по мерчандайзингу",
-                "Мусорные баки опустошены",
-                "Складское и подсобное помещения чистые",
-                "Неактуальные материалы (VM, TPOSM) вывезены на склад"
+                "Мусорные баки опустошены", "Складское и подсобное помещения чистые",
+                "Неактуальные материалы вывезены на склад"
             ],
             "Команда": [
                 "Персонал соблюдает требования по внешнему виду (униформа, бейджи)",
@@ -605,74 +226,60 @@
             "Запас": [
                 "Произведен ежедневный пересчет (cycle count)",
                 "Оптимальный запас продажного стока обеспечен",
-                "Запас тестовых и подменных устройств (min 8 шт., из них min 4 LIL SOLID, статус RENT)",
-                "Запас печатных материалов и шаблонов документов обеспечен",
-                "Запас инструментов для чистки (палочки, щетки, шпатели, иглы, насадки)"
+                "Запас тестовых и подменных устройств (min 8 шт., min 4 LIL SOLID, RENT)",
+                "Запас печатных материалов и шаблонов обеспечен",
+                "Запас инструментов для чистки обеспечен"
             ],
             "Сервисное обслуживание": [
-                "Проверены кейсы на длительную диагностику (наличие, информация, статус)",
-                "Проверены кейсы на независимую экспертизу (наличие, информация, статус)"
+                "Проверены кейсы на длительную диагностику",
+                "Проверены кейсы на независимую экспертизу"
             ],
-            "Заказы клиентов": [
-                "Определено наличие заказов C2C / C&C"
-            ]
+            "Заказы клиентов": ["Определено наличие заказов C2C / C&C"]
         };
 
         const closingChecklist = {
-            "При закрытии": [
-                "Все клиенты покинули торговую точку",
-                "Двери закрыты"
-            ],
-            "Экстерьер": [
-                "Пространство вокруг точки — чисто",
-                "Внешние стеклянные элементы — чистые, без разводов и следов"
-            ],
+            "При закрытии": ["Все клиенты покинули торговую точку", "Двери закрыты"],
+            "Экстерьер": ["Пространство вокруг точки — чисто", "Внешние стеклянные элементы — чистые"],
             "Интерьер — чистота и порядок": [
-                "Пол чистый",
-                "Столы и иное оборудование чистые и протертые",
-                "Мусорные баки опустошены",
-                "Складское и подсобное помещения чистые, порядок соблюден",
-                "Неактуальные материалы вывезены на склад / подготовлены к отправке"
+                "Пол чистый", "Столы и оборудование чистые и протертые",
+                "Мусорные баки опустошены", "Склад чистый, порядок соблюден",
+                "Неактуальные материалы вывезены"
             ],
             "Команда": [
-                "Касса и терминал — смена закрыта, чеки и ведомость опубликованы в Teams",
-                "Наличные деньги помещены в сейф или произведена инкассация",
-                "Произведен Check-out в WFM и Sales Force"
+                "Касса и терминал — смена закрыта, чеки в Teams",
+                "Наличные деньги в сейфе или инкассация",
+                "Check-out в WFM и Sales Force"
             ],
             "Интерьер — техническое оснащение": [
-                "Принтер и компьютер выключены",
-                "Система видеонаблюдения работает",
-                "Световые дисплеи и музыка выключены",
-                "Торговое оборудование и фурнитура без повреждений"
+                "Принтер и компьютер выключены", "Видеонаблюдение работает",
+                "Световые дисплеи и музыка выключены", "Оборудование без повреждений"
             ],
             "Оборудование": [
-                "Все устройства (IQOS/LIL) поставлены на зарядку",
-                "Планшеты персонала выключены и поставлены на зарядку"
+                "Устройства (IQOS/LIL) поставлены на зарядку",
+                "Планшеты персонала выключены и на зарядке"
             ],
             "Сервисное обслуживание": [
-                "Замены завершены в Sales Force, опубликованы в Teams, акты подписаны, устройства в сейф-пакете",
-                "Возвраты завершены в Sales Force и по кассе, подготовлены к отправке",
-                "Кейсы на длительную диагностику обработаны, информация передана следующей смене",
-                "Кейсы на независимую экспертизу обработаны, информация передана следующей смене"
+                "Замены завершены в Sales Force, акты подписаны",
+                "Возвраты завершены в Sales Force и по кассе",
+                "Кейсы на длительную диагностику обработаны",
+                "Кейсы на независимую экспертизу обработаны"
             ],
             "После заполнения чек-листа": [
-                "Оставить комментарии для следующей смены (при необходимости)",
-                "Выключить всё световое оборудование",
-                "Активировать охранную сигнализацию",
-                "Покинуть торговую точку и закрыть дверь"
+                "Комментарии для следующей смены оставлены",
+                "Световое оборудование выключено",
+                "Охранная сигнализация активирована",
+                "Дверь закрыта"
             ]
         };
 
         function renderChecklist(data, containerId) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
-
             for (const [section, items] of Object.entries(data)) {
-                const sectionTitle = document.createElement('div');
-                sectionTitle.className = 'checklist-section-title';
-                sectionTitle.textContent = section;
-                container.appendChild(sectionTitle);
-
+                const title = document.createElement('div');
+                title.className = 'checklist-section-title';
+                title.textContent = section;
+                container.appendChild(title);
                 items.forEach((item, index) => {
                     const itemId = `${containerId}-${section}-${index}`;
                     const div = document.createElement('div');
@@ -681,23 +288,18 @@
                     div.innerHTML = `
                         <div class="checklist-item-main">
                             <div class="checkbox-custom">
-                                <svg class="icon-check" width="13" height="10" viewBox="0 0 13 10" fill="none">
-                                    <path d="M1 5L4.5 8.5L12 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                <svg class="icon-cross" width="11" height="11" viewBox="0 0 11 11" fill="none">
-                                    <path d="M1 1L10 10M10 1L1 10" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
-                                </svg>
+                                <svg class="icon-check" width="13" height="10" viewBox="0 0 13 10"><path d="M1 5L4.5 8.5L12 1" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg>
+                                <svg class="icon-cross" width="11" height="11" viewBox="0 0 11 11"><path d="M1 1L10 10M10 1L1 10" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg>
                             </div>
                             <span class="item-text">${item}</span>
                             <div class="item-actions">
-                                <button class="action-btn btn-yes" onclick="event.stopPropagation(); markItem('${itemId}', 'yes')">✓</button>
-                                <button class="action-btn btn-no" onclick="event.stopPropagation(); markItem('${itemId}', 'no')">✕</button>
+                                <button class="action-btn btn-yes" onclick="event.stopPropagation(); markItem('${itemId}','yes')">✓</button>
+                                <button class="action-btn btn-no" onclick="event.stopPropagation(); markItem('${itemId}','no')">✕</button>
                             </div>
                         </div>
                         <div class="reason-input" id="reason-${itemId}">
-                            <input type="text" placeholder="Причина невыполнения..." oninput="updateReason('${itemId}', this.value)">
-                        </div>
-                    `;
+                            <input type="text" placeholder="Причина..." oninput="updateReason('${itemId}',this.value)">
+                        </div>`;
                     container.appendChild(div);
                 });
             }
@@ -705,31 +307,26 @@
 
         function markItem(itemId, status) {
             const item = document.querySelector(`[data-item-id="${itemId}"]`);
-            const reasonInput = document.getElementById(`reason-${itemId}`);
+            const reason = document.getElementById(`reason-${itemId}`);
             item.classList.remove('checked', 'unchecked');
             if (status === 'yes') {
-                item.classList.add('checked');
-                reasonInput.classList.remove('show');
-                delete itemReasons[itemId];
+                item.classList.add('checked'); reason.classList.remove('show'); delete itemReasons[itemId];
             } else {
-                item.classList.add('unchecked');
-                reasonInput.classList.add('show');
-                setTimeout(() => reasonInput.querySelector('input').focus(), 100);
+                item.classList.add('unchecked'); reason.classList.add('show');
+                setTimeout(() => reason.querySelector('input').focus(), 100);
                 if (!itemReasons[itemId]) itemReasons[itemId] = '';
             }
             updateCounter();
         }
 
-        function updateReason(itemId, value) {
-            itemReasons[itemId] = value.trim();
-        }
+        function updateReason(itemId, value) { itemReasons[itemId] = value.trim(); }
 
         function updateCounter() {
-            const activeSection = currentMode === 'opening' ? 'opening-section' : 'closing-section';
-            const all = document.querySelectorAll(`#${activeSection} .checklist-item`).length;
-            const checked = document.querySelectorAll(`#${activeSection} .checklist-item.checked`).length;
-            const unchecked = document.querySelectorAll(`#${activeSection} .checklist-item.unchecked`).length;
-            document.getElementById('counterText').textContent = `✅ ${checked} | ❌ ${unchecked} | Всего: ${all}`;
+            const s = currentMode === 'opening' ? 'opening-section' : 'closing-section';
+            const all = document.querySelectorAll(`#${s} .checklist-item`).length;
+            const checked = document.querySelectorAll(`#${s} .checklist-item.checked`).length;
+            const unchecked = document.querySelectorAll(`#${s} .checklist-item.unchecked`).length;
+            document.getElementById('counterText').textContent = `${checked} | ❌ ${unchecked} | Всего: ${all}`;
         }
 
         function switchMode(mode) {
@@ -746,123 +343,60 @@
             document.getElementById('alertMessage').textContent = message;
             document.getElementById('alertOverlay').classList.add('show');
         }
+        function closeAlert() { document.getElementById('alertOverlay').classList.remove('show'); }
 
-        function closeAlert() {
-            document.getElementById('alertOverlay').classList.remove('show');
-        }
-
-        function setLoading(loading) {
-            const btn = document.getElementById('submitBtn');
-            const text = document.getElementById('submitText');
-            if (loading) {
-                btn.classList.add('loading');
-                text.textContent = 'Отправка...';
-            } else {
-                btn.classList.remove('loading');
-                text.textContent = '📤 Отправить отчет';
-            }
+        function setLoading(l) {
+            document.getElementById('submitBtn').classList.toggle('loading', l);
+            document.getElementById('submitText').textContent = l ? 'Отправка...' : '📤 Отправить отчет';
         }
 
         function collectReportData() {
-            const activeSection = currentMode === 'opening' ? 'opening-section' : 'closing-section';
-            const items = document.querySelectorAll(`#${activeSection} .checklist-item`);
-            const headers = document.querySelectorAll(`#${activeSection} .checklist-section-title`);
-            let checked = 0, unchecked = 0;
-            let sections = [];
-            let currentSec = null;
-
-            headers.forEach(h => {
-                if (currentSec) sections.push(currentSec);
-                currentSec = { title: h.textContent, items: [] };
-            });
-
-            let secIdx = -1;
+            const s = currentMode === 'opening' ? 'opening-section' : 'closing-section';
+            const items = document.querySelectorAll(`#${s} .checklist-item`);
+            const headers = document.querySelectorAll(`#${s} .checklist-section-title`);
+            let checked = 0, unchecked = 0, sections = [], cur = null;
+            headers.forEach(h => { if (cur) sections.push(cur); cur = { title: h.textContent, items: [] }; });
+            let idx = -1;
             items.forEach(item => {
                 const id = item.getAttribute('data-item-id');
-                const isChecked = item.classList.contains('checked');
-                const isUnchecked = item.classList.contains('unchecked');
+                const isC = item.classList.contains('checked'), isU = item.classList.contains('unchecked');
                 const text = item.querySelector('.item-text').textContent;
                 const reason = itemReasons[id] || '';
-                if (isChecked) checked++;
-                if (isUnchecked) unchecked++;
-                for (let j = headers.length - 1; j >= 0; j--) {
-                    if (headers[j].compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING) {
-                        secIdx = j; break;
-                    }
+                if (isC) checked++; if (isU) unchecked++;
+                for (let j = headers.length-1; j >= 0; j--) {
+                    if (headers[j].compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING) { idx = j; break; }
                 }
-                if (secIdx >= 0 && secIdx < sections.length) {
-                    sections[secIdx].items.push({ text, isChecked, isUnchecked, reason });
-                }
+                if (idx >= 0 && idx < sections.length) sections[idx].items.push({ text, isChecked: isC, isUnchecked: isU, reason });
             });
-            if (currentSec) sections.push(currentSec);
+            if (cur) sections.push(cur);
             return { sections, checked, unchecked, total: items.length };
         }
 
-        function buildReportText(storeName, date, employeeName, comments, reportData) {
-            let msg = `📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ\n\n`;
-            msg += `🏪 Точка: ${storeName}\n`;
-            msg += `📅 Дата: ${date}\n`;
-            msg += `👤 Сотрудник: ${employeeName}\n`;
-            msg += `🕐 Режим: ${currentMode === 'opening' ? 'Открытие смены' : 'Закрытие смены'}\n`;
-            msg += `📊 Статистика:\n`;
-            msg += `✅ Выполнено: ${reportData.checked}\n`;
-            msg += `❌ Не выполнено: ${reportData.unchecked}\n`;
-            msg += `📋 Всего пунктов: ${reportData.total}\n\n`;
-            msg += `📝 ДЕТАЛИ:\n`;
-
-            reportData.sections.forEach(sec => {
+        function buildFullReport(storeName, date, employeeName, comments, data) {
+            const mode = currentMode === 'opening' ? 'Открытие смены' : 'Закрытие смены';
+            let msg = `📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ\n\n🏪 ${storeName}\n📅 ${date}\n👤 ${employeeName}\n🕐 ${mode}\n\n📊 СТАТИСТИКА:\n✅ ${data.checked}\n❌ ${data.unchecked}\n📋 ${data.total}\n\n📝 ДЕТАЛИ:\n`;
+            data.sections.forEach(sec => {
                 msg += `\n📌 ${sec.title}:\n`;
                 sec.items.forEach(it => {
-                    let icon = '⬜';
-                    if (it.isChecked) icon = '✅';
-                    if (it.isUnchecked) {
-                        icon = '❌';
-                    }
-                    msg += `${icon} ${it.text}`;
-                    if (it.isUnchecked && it.reason) {
-                        msg += ` — ${it.reason}`;
-                    }
-                    msg += `\n`;
+                    let icon = '⬜'; if (it.isChecked) icon = '✅'; if (it.isUnchecked) icon = '❌';
+                    msg += `${icon} ${it.text}${it.isUnchecked&&it.reason?' — '+it.reason:''}\n`;
                 });
             });
-
-            if (comments) {
-                msg += `\n💬 Комментарий: ${comments}\n`;
-            }
-
+            if (comments) msg += `\n💬 ${comments}\n`;
             msg += `\nEGORKIN DEV`;
-
             return msg;
         }
 
-        async function sendToVK(text) {
-            // Разбиваем длинное сообщение на части (ВК ограничение ~4000 символов)
-            const maxLen = 4000;
-            const messages = [];
-            
-            if (text.length <= maxLen) {
-                messages.push(text);
-            } else {
-                let remaining = text;
-                while (remaining.length > 0) {
-                    messages.push(remaining.substring(0, maxLen));
-                    remaining = remaining.substring(maxLen);
-                }
-            }
-
-            for (let i = 0; i < messages.length; i++) {
-                const randomId = Math.floor(Math.random() * 2147483647);
-                const url = `https://api.vk.com/method/messages.send?peer_id=${VK_PEER_ID}&message=${encodeURIComponent(messages[i])}&random_id=${randomId}&access_token=${VK_TOKEN}&v=5.199`;
-                
-                const res = await fetch(url);
-                const data = await res.json();
-                
-                if (data.error) {
-                    throw new Error(data.error.error_msg);
-                }
-            }
-
-            return true;
+        function sendToVK(text) {
+            const max = 4000, msgs = [];
+            let r = text;
+            while (r.length > 0) { msgs.push(r.substring(0, max)); r = r.substring(max); }
+            msgs.forEach((msg, i) => {
+                setTimeout(() => {
+                    const rid = Math.floor(Math.random() * 2147483647);
+                    new Image().src = `https://api.vk.com/method/messages.send?peer_id=${VK_PEER_ID}&message=${encodeURIComponent(msg)}&random_id=${rid}&access_token=${VK_TOKEN}&v=5.199`;
+                }, i * 500);
+            });
         }
 
         async function generateReport() {
@@ -870,24 +404,12 @@
             const date = document.getElementById('date').value;
             const employeeName = document.getElementById('employeeName').value.trim();
             const comments = document.getElementById('comments').value.trim();
-
-            if (!storeName || !date || !employeeName) {
-                showAlert('⚠️ Не все поля заполнены', 'Укажите название точки, дату и фамилию.');
-                return;
-            }
-
-            const reportData = collectReportData();
-            const reportText = buildReportText(storeName, date, employeeName, comments, reportData);
-
+            if (!storeName || !date || !employeeName) { showAlert('⚠️ Заполните все поля', ''); return; }
+            const data = collectReportData();
+            const report = buildFullReport(storeName, date, employeeName, comments, data);
             setLoading(true);
-            try {
-                await sendToVK(reportText);
-                showAlert('✅ Отправлено!', `Отчет отправлен в личку ВК!\n\n🏪 ${storeName}\n✅${reportData.checked} ❌${reportData.unchecked} 📊${reportData.total}`);
-            } catch (e) {
-                showAlert('❌ Ошибка', e.message);
-            } finally {
-                setLoading(false);
-            }
+            sendToVK(report);
+            setTimeout(() => { setLoading(false); showAlert('✅ Отправлено!', `🏪 ${storeName}\n✅${data.checked} ❌${data.unchecked} 📊${data.total}`); }, 1500);
         }
 
         renderChecklist(openingChecklist, 'opening-section');
