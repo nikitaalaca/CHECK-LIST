@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Чек-лист смены</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.72);
@@ -364,52 +363,6 @@
             font-size: 13px;
         }
 
-        .photo-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border: 1.5px dashed rgba(0,0,0,0.1);
-            border-radius: var(--radius-lg);
-            padding: 22px;
-            text-align: center;
-            cursor: pointer;
-            transition: all var(--transition);
-            margin-bottom: 14px;
-        }
-        .photo-card:active {
-            transform: scale(0.98);
-        }
-        .photo-card .photo-icon {
-            font-size: 30px;
-            margin-bottom: 4px;
-        }
-        .photo-card .photo-label {
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--blue);
-        }
-        .photo-card .photo-hint {
-            font-size: 12px;
-            color: var(--gray);
-            margin-top: 2px;
-        }
-        .photo-card input[type="file"] {
-            display: none;
-        }
-        .photo-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        .photo-preview .preview-item {
-            width: 60px;
-            height: 60px;
-            border-radius: 10px;
-            object-fit: cover;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
         .submit-btn {
             width: 100%;
             height: 52px;
@@ -587,14 +540,6 @@
             </div>
         </div>
 
-        <div class="photo-card" onclick="document.getElementById('photoInput').click()">
-            <div class="photo-icon">📸</div>
-            <div class="photo-label">Добавить фото</div>
-            <div class="photo-hint">Можно выбрать несколько</div>
-            <input type="file" id="photoInput" multiple accept="image/*" onchange="handlePhotos(event)">
-            <div class="photo-preview" id="photoPreview"></div>
-        </div>
-
         <button class="submit-btn" id="submitBtn" onclick="generateReport()">
             <span id="submitText">📤 Отправить отчет</span>
             <div class="loader"></div>
@@ -619,15 +564,12 @@
     </div>
 
     <script>
-        // ============ ДАННЫЕ ВКОНТАКТЕ ============
         const VK_TOKEN = 'vk1.a.PHky48EWWRc-DMzQF_SqxdgVmhpSwFIradgbT05RBvV_Bl79jQvExzS3DtJO9sUl-QBeQTnIOjXTsQAhtk1x0avNgJV56eZnihR0UxhX_faQvnueIIb-e5Ya9x0Yq0vjA3GXKJYv4ePcXcRN7C3AeiUT_uPBUCX-0oZcCY6Xyk2xV0Q8SUadnA0KTFK1Jx6q5LUVYHH5vKhIk5ocN5ZVdg';
-        const VK_PEER_ID = '2000000505';
-        // ===========================================
+        const VK_PEER_ID = '141629419';
 
         document.getElementById('date').valueAsDate = new Date();
 
         let currentMode = 'opening';
-        let photos = [];
         let itemReasons = {};
 
         const openingChecklist = {
@@ -799,26 +741,6 @@
             updateCounter();
         }
 
-        function handlePhotos(event) {
-            const files = event.target.files;
-            const preview = document.getElementById('photoPreview');
-            preview.innerHTML = '';
-            photos = [];
-            for (let file of files) {
-                if (file.type.startsWith('image/')) {
-                    photos.push(file);
-                    const reader = new FileReader();
-                    reader.onload = e => {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.className = 'preview-item';
-                        preview.appendChild(img);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            }
-        }
-
         function showAlert(title, message) {
             document.getElementById('alertTitle').textContent = title;
             document.getElementById('alertMessage').textContent = message;
@@ -834,7 +756,7 @@
             const text = document.getElementById('submitText');
             if (loading) {
                 btn.classList.add('loading');
-                text.textContent = 'Отправка';
+                text.textContent = 'Отправка...';
             } else {
                 btn.classList.remove('loading');
                 text.textContent = '📤 Отправить отчет';
@@ -876,157 +798,71 @@
             return { sections, checked, unchecked, total: items.length };
         }
 
-        async function generatePDF(storeName, date, employeeName, comments, reportData) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-
-            let y = 15;
-            doc.setFontSize(18);
-            doc.setTextColor(0, 122, 255);
-            doc.text('ОТЧЕТ ПО ЧЕК-ЛИСТУ', 105, y, { align: 'center' });
-            y += 8;
-            doc.setDrawColor(0, 122, 255);
-            doc.setLineWidth(0.5);
-            doc.line(15, y, 195, y);
-            y += 8;
-            doc.setFontSize(12);
-            doc.setTextColor(28, 28, 30);
-            doc.text(`Точка: ${storeName}`, 15, y); y += 7;
-            doc.text(`Дата: ${date}`, 15, y); y += 7;
-            doc.text(`Сотрудник: ${employeeName}`, 15, y); y += 7;
-            doc.text(`Режим: ${currentMode === 'opening' ? 'Открытие смены' : 'Закрытие смены'}`, 15, y); y += 7;
-            doc.text(`Выполнено: ${reportData.checked} | Не выполнено: ${reportData.unchecked} | Всего: ${reportData.total}`, 15, y);
-            y += 10;
+        function buildReportText(storeName, date, employeeName, comments, reportData) {
+            let msg = `📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ\n\n`;
+            msg += `🏪 Точка: ${storeName}\n`;
+            msg += `📅 Дата: ${date}\n`;
+            msg += `👤 Сотрудник: ${employeeName}\n`;
+            msg += `🕐 Режим: ${currentMode === 'opening' ? 'Открытие смены' : 'Закрытие смены'}\n`;
+            msg += `📊 Статистика:\n`;
+            msg += `✅ Выполнено: ${reportData.checked}\n`;
+            msg += `❌ Не выполнено: ${reportData.unchecked}\n`;
+            msg += `📋 Всего пунктов: ${reportData.total}\n\n`;
+            msg += `📝 ДЕТАЛИ:\n`;
 
             reportData.sections.forEach(sec => {
-                if (y > 260) { doc.addPage(); y = 15; }
-                doc.setFontSize(13);
-                doc.setTextColor(0, 122, 255);
-                doc.text(sec.title, 15, y);
-                y += 7;
+                msg += `\n📌 ${sec.title}:\n`;
                 sec.items.forEach(it => {
-                    if (y > 270) { doc.addPage(); y = 15; }
-                    let icon = it.isChecked ? '[V]' : (it.isUnchecked ? '[X]' : '[ ]');
-                    let text = `${icon} ${it.text}`;
-                    if (it.isUnchecked && it.reason) text += ` - Причина: ${it.reason}`;
-                    doc.setFontSize(10);
-                    if (it.isChecked) doc.setTextColor(52, 199, 89);
-                    else if (it.isUnchecked) doc.setTextColor(255, 59, 48);
-                    else doc.setTextColor(142, 142, 147);
-                    const lines = doc.splitTextToSize(text, 175);
-                    lines.forEach(line => {
-                        if (y > 275) { doc.addPage(); y = 15; }
-                        doc.text(line, 18, y);
-                        y += 5;
-                    });
-                    y += 1;
+                    let icon = '⬜';
+                    if (it.isChecked) icon = '✅';
+                    if (it.isUnchecked) {
+                        icon = '❌';
+                    }
+                    msg += `${icon} ${it.text}`;
+                    if (it.isUnchecked && it.reason) {
+                        msg += ` — ${it.reason}`;
+                    }
+                    msg += `\n`;
                 });
-                y += 4;
             });
 
             if (comments) {
-                if (y > 250) { doc.addPage(); y = 15; }
-                y += 4;
-                doc.setFontSize(12);
-                doc.setTextColor(28, 28, 30);
-                doc.text('Комментарий:', 15, y); y += 7;
-                doc.setFontSize(10);
-                doc.setTextColor(99, 99, 102);
-                const commentLines = doc.splitTextToSize(comments, 175);
-                commentLines.forEach(line => {
-                    if (y > 275) { doc.addPage(); y = 15; }
-                    doc.text(line, 18, y);
-                    y += 5;
-                });
+                msg += `\n💬 Комментарий: ${comments}\n`;
             }
 
-            doc.setFontSize(8);
-            doc.setTextColor(142, 142, 147);
-            doc.text('EGORKIN DEV', 105, 288, { align: 'center' });
+            msg += `\nEGORKIN DEV`;
 
-            return doc.output('blob');
+            return msg;
         }
 
-        async function uploadFileToVK(file, filename) {
-            const uploadUrlRes = await fetch(`https://api.vk.com/method/docs.getMessagesUploadServer?type=doc&peer_id=${VK_PEER_ID}&access_token=${VK_TOKEN}&v=5.199`);
-            const uploadUrlData = await uploadUrlRes.json();
+        async function sendToVK(text) {
+            // Разбиваем длинное сообщение на части (ВК ограничение ~4000 символов)
+            const maxLen = 4000;
+            const messages = [];
             
-            if (uploadUrlData.error) {
-                throw new Error(`VK API ошибка: ${uploadUrlData.error.error_msg}`);
-            }
-
-            const formData = new FormData();
-            formData.append('file', file, filename);
-            const uploadRes = await fetch(uploadUrlData.response.upload_url, { method: 'POST', body: formData });
-            const uploadData = await uploadRes.json();
-
-            const saveRes = await fetch(`https://api.vk.com/method/docs.save?file=${uploadData.file}&access_token=${VK_TOKEN}&v=5.199`);
-            const saveData = await saveRes.json();
-
-            if (saveData.error) {
-                throw new Error(`VK API ошибка сохранения: ${saveData.error.error_msg}`);
-            }
-
-            return `doc${saveData.response.doc.owner_id}_${saveData.response.doc.id}`;
-        }
-
-        async function uploadPhotoToVK(file) {
-            const uploadUrlRes = await fetch(`https://api.vk.com/method/photos.getMessagesUploadServer?peer_id=${VK_PEER_ID}&access_token=${VK_TOKEN}&v=5.199`);
-            const uploadUrlData = await uploadUrlRes.json();
-
-            if (uploadUrlData.error) {
-                throw new Error(`VK API ошибка: ${uploadUrlData.error.error_msg}`);
-            }
-
-            const formData = new FormData();
-            formData.append('photo', file);
-            const uploadRes = await fetch(uploadUrlData.response.upload_url, { method: 'POST', body: formData });
-            const uploadData = await uploadRes.json();
-
-            const saveRes = await fetch(`https://api.vk.com/method/photos.saveMessagesPhoto?photo=${uploadData.photo}&server=${uploadData.server}&hash=${uploadData.hash}&access_token=${VK_TOKEN}&v=5.199`);
-            const saveData = await saveRes.json();
-
-            if (saveData.error) {
-                throw new Error(`VK API ошибка сохранения фото: ${saveData.error.error_msg}`);
-            }
-
-            return `photo${saveData.response[0].owner_id}_${saveData.response[0].id}`;
-        }
-
-        async function sendToVK(headerText, pdfBlob, photoFiles) {
-            const pdfAttachment = await uploadFileToVK(pdfBlob, 'checklist_report.pdf');
-
-            let photoAttachments = '';
-            if (photoFiles && photoFiles.length > 0) {
-                for (const photo of photoFiles) {
-                    try {
-                        const photoId = await uploadPhotoToVK(photo);
-                        photoAttachments += (photoAttachments ? ',' : '') + photoId;
-                    } catch (e) {
-                        console.warn('Ошибка загрузки фото:', e);
-                    }
+            if (text.length <= maxLen) {
+                messages.push(text);
+            } else {
+                let remaining = text;
+                while (remaining.length > 0) {
+                    messages.push(remaining.substring(0, maxLen));
+                    remaining = remaining.substring(maxLen);
                 }
             }
 
-            let attachments = pdfAttachment;
-            if (photoAttachments) {
-                attachments += ',' + photoAttachments;
+            for (let i = 0; i < messages.length; i++) {
+                const randomId = Math.floor(Math.random() * 2147483647);
+                const url = `https://api.vk.com/method/messages.send?peer_id=${VK_PEER_ID}&message=${encodeURIComponent(messages[i])}&random_id=${randomId}&access_token=${VK_TOKEN}&v=5.199`;
+                
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.error_msg);
+                }
             }
 
-            const randomId = Math.floor(Math.random() * 2147483647);
-            const sendUrl = `https://api.vk.com/method/messages.send?peer_id=${VK_PEER_ID}&message=${encodeURIComponent(headerText)}&attachment=${attachments}&random_id=${randomId}&access_token=${VK_TOKEN}&v=5.199`;
-            
-            console.log('Отправка в беседу ВК...');
-            const sendRes = await fetch(sendUrl);
-            const sendData = await sendRes.json();
-
-            if (sendData.error) {
-                console.error('Ошибка ВК:', sendData.error);
-                throw new Error(`VK API ошибка: ${sendData.error.error_msg}`);
-            }
-
-            console.log('Отправлено успешно!');
-            return sendData;
+            return true;
         }
 
         async function generateReport() {
@@ -1041,29 +877,14 @@
             }
 
             const reportData = collectReportData();
-
-            let headerMsg = `📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ\n\n`;
-            headerMsg += `🏪 Точка: ${storeName}\n`;
-            headerMsg += `📅 Дата: ${date}\n`;
-            headerMsg += `👤 Сотрудник: ${employeeName}\n`;
-            headerMsg += `🕐 Режим: ${currentMode === 'opening' ? 'Открытие' : 'Закрытие'}\n`;
-            headerMsg += `📊 Статистика:\n`;
-            headerMsg += `✅ Выполнено: ${reportData.checked}\n`;
-            headerMsg += `❌ Не выполнено: ${reportData.unchecked}\n`;
-            headerMsg += `📋 Всего пунктов: ${reportData.total}\n`;
-            if (comments) {
-                headerMsg += `\n💬 Комментарий: ${comments}\n`;
-            }
-            headerMsg += `\n📎 Полный чек-лист в PDF-файле ниже`;
+            const reportText = buildReportText(storeName, date, employeeName, comments, reportData);
 
             setLoading(true);
             try {
-                const pdfBlob = await generatePDF(storeName, date, employeeName, comments, reportData);
-                await sendToVK(headerMsg, pdfBlob, photos);
-                showAlert('✅ Отправлено!', `Шапка + PDF + фото отправлены в беседу ВК!\n\n🏪 ${storeName}\n✅${reportData.checked} ❌${reportData.unchecked} 📊${reportData.total}`);
+                await sendToVK(reportText);
+                showAlert('✅ Отправлено!', `Отчет отправлен в личку ВК!\n\n🏪 ${storeName}\n✅${reportData.checked} ❌${reportData.unchecked} 📊${reportData.total}`);
             } catch (e) {
-                console.error('Ошибка:', e);
-                showAlert('❌ Ошибка', `${e.message}\n\nУбедись, что группа добавлена в беседу.`);
+                showAlert('❌ Ошибка', e.message);
             } finally {
                 setLoading(false);
             }
