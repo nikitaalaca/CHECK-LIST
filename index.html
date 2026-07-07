@@ -348,9 +348,7 @@
             updateCounter();
         }
 
-        function updateReason(itemId, value) {
-            itemReasons[itemId] = value.trim();
-        }
+        function updateReason(itemId, value) { itemReasons[itemId] = value.trim(); }
 
         function updateCounter() {
             const s = currentMode === 'opening' ? 'opening-section' : 'closing-section';
@@ -422,41 +420,80 @@
             return { sections, checked, unchecked, total: items.length };
         }
 
+        // Генерация PDF
+        async function generatePDF(storeName, date, employeeName, comments, data) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+            let y = 15;
+            doc.setFontSize(18); doc.setTextColor(0, 122, 255);
+            doc.text('ОТЧЕТ ПО ЧЕК-ЛИСТУ', 105, y, { align: 'center' }); y += 8;
+            doc.setDrawColor(0, 122, 255); doc.line(15, y, 195, y); y += 8;
+            doc.setFontSize(12); doc.setTextColor(28, 28, 30);
+            doc.text(`Точка: ${storeName}`, 15, y); y += 7;
+            doc.text(`Дата: ${date}`, 15, y); y += 7;
+            doc.text(`Сотрудник: ${employeeName}`, 15, y); y += 7;
+            doc.text(`Режим: ${currentMode==='opening'?'Открытие':'Закрытие'}`, 15, y); y += 7;
+            doc.text(`Выполнено: ${data.checked} | Не выполнено: ${data.unchecked} | Всего: ${data.total}`, 15, y); y += 10;
+
+            data.sections.forEach(sec => {
+                if (y > 260) { doc.addPage(); y = 15; }
+                doc.setFontSize(13); doc.setTextColor(0, 122, 255);
+                doc.text(sec.title, 15, y); y += 7;
+                sec.items.forEach(it => {
+                    if (y > 270) { doc.addPage(); y = 15; }
+                    let icon = it.isChecked ? '[V]' : (it.isUnchecked ? '[X]' : '[ ]');
+                    let text = `${icon} ${it.text}`;
+                    if (it.isUnchecked && it.reason) text += ` - ${it.reason}`;
+                    doc.setFontSize(10);
+                    doc.setTextColor(it.isChecked ? 52 : (it.isUnchecked ? 255 : 142), it.isChecked ? 199 : (it.isUnchecked ? 59 : 142), it.isChecked ? 89 : (it.isUnchecked ? 48 : 147));
+                    doc.splitTextToSize(text, 175).forEach(line => {
+                        if (y > 275) { doc.addPage(); y = 15; }
+                        doc.text(line, 18, y); y += 5;
+                    });
+                    y += 1;
+                });
+                y += 4;
+            });
+
+            if (comments) {
+                if (y > 250) { doc.addPage(); y = 15; }
+                y += 4; doc.setFontSize(12); doc.setTextColor(28, 28, 30);
+                doc.text('Комментарий:', 15, y); y += 7;
+                doc.setFontSize(10); doc.setTextColor(99, 99, 102);
+                doc.text(comments, 18, y, { maxWidth: 175 });
+            }
+            doc.setFontSize(8); doc.setTextColor(142, 142, 147);
+            doc.text('EGORKIN DEV', 105, 288, { align: 'center' });
+            return doc.output('blob');
+        }
+
         function buildFullReport(storeName, date, employeeName, comments, data) {
             const mode = currentMode === 'opening' ? 'Открытие смены' : 'Закрытие смены';
             let msg = `📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ\n\n`;
-            msg += `🏪 Точка: ${storeName}\n`;
-            msg += `📅 Дата: ${date}\n`;
-            msg += `👤 Сотрудник: ${employeeName}\n`;
-            msg += `🕐 Режим: ${mode}\n\n`;
-            msg += `📊 СТАТИСТИКА:\n`;
-            msg += `✅ Выполнено: ${data.checked}\n`;
-            msg += `❌ Не выполнено: ${data.unchecked}\n`;
-            msg += `📋 Всего пунктов: ${data.total}\n\n`;
-            msg += `📝 ДЕТАЛИ:\n`;
-
+            msg += `🏪 Точка: ${storeName}\n📅 Дата: ${date}\n👤 Сотрудник: ${employeeName}\n🕐 Режим: ${mode}\n\n`;
+            msg += `📊 СТАТИСТИКА:\n✅ Выполнено: ${data.checked}\n❌ Не выполнено: ${data.unchecked}\n📋 Всего: ${data.total}\n\n📝 ДЕТАЛИ:\n`;
             data.sections.forEach(sec => {
                 msg += `\n📌 ${sec.title}:\n`;
                 sec.items.forEach(it => {
-                    let icon = '⬜';
-                    if (it.isChecked) icon = '✅';
-                    if (it.isUnchecked) icon = '❌';
-                    msg += `${icon} ${it.text}`;
-                    if (it.isUnchecked && it.reason) msg += ` — ${it.reason}`;
-                    msg += `\n`;
+                    let icon = '⬜'; if (it.isChecked) icon = '✅'; if (it.isUnchecked) icon = '❌';
+                    msg += `${icon} ${it.text}${it.isUnchecked&&it.reason?' — '+it.reason:''}\n`;
                 });
             });
-
             if (comments) msg += `\n💬 Комментарий: ${comments}\n`;
             msg += `\nEGORKIN DEV`;
             return msg;
         }
 
-        async function sendReport(message) {
+        // Отправка через сервер Netlify
+        async function sendReport(message, pdfBase64, photosBase64) {
             const response = await fetch('/api/send-report', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: message })
+                body: JSON.stringify({ 
+                    message: message,
+                    pdf: pdfBase64 || null,
+                    photos: photosBase64 || []
+                })
             });
 
             if (!response.ok) {
@@ -483,12 +520,33 @@
 
             setLoading(true);
             try {
-                await sendReport(report);
+                // Генерируем PDF
+                const pdfBlob = await generatePDF(storeName, date, employeeName, comments, data);
+                
+                // Конвертируем PDF в base64
+                const pdfBase64 = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                    reader.readAsDataURL(pdfBlob);
+                });
+
+                // Конвертируем фото в base64
+                const photosBase64 = [];
+                for (const photo of photos) {
+                    const base64 = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                        reader.readAsDataURL(photo);
+                    });
+                    photosBase64.push(base64);
+                }
+
+                await sendReport(report, pdfBase64, photosBase64);
                 setLoading(false);
-                showAlert('✅ Отправлено!', `Отчет в беседу!\n🏪 ${storeName}\n✅${data.checked} ❌${data.unchecked} 📊${data.total}`);
+                showAlert('✅ Отправлено!', `PDF + фото в беседу!\n🏪 ${storeName}\n✅${data.checked} ❌${data.unchecked} 📊${data.total}`);
             } catch (e) {
-                console.warn('Сервер недоступен, отправка напрямую...');
-                // Fallback — напрямую
+                console.warn('Сервер недоступен, отправка напрямую...', e);
+                // Fallback — только текст
                 const msgs = [];
                 let r = report;
                 while (r.length > 0) { msgs.push(r.substring(0, 4000)); r = r.substring(4000); }
@@ -498,7 +556,7 @@
                     }, i * 500);
                 });
                 setLoading(false);
-                showAlert('✅ Отправлено!', `Отчет в беседу!\n🏪 ${storeName}\n✅${data.checked} ❌${data.unchecked} 📊${data.total}`);
+                showAlert('⚠️ Только текст', 'Сервер недоступен. Отправлен текст (без PDF/фото).');
             }
         }
 
