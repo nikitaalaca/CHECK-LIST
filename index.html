@@ -85,9 +85,7 @@
         }
         .action-btn:active { transform: scale(0.92); }
         .btn-yes { border-color: rgba(52,199,89,0.4); color: var(--green); }
-        .btn-yes:hover { background: rgba(52,199,89,0.08); }
         .btn-no { border-color: rgba(255,59,48,0.4); color: var(--red); }
-        .btn-no:hover { background: rgba(255,59,48,0.08); }
         .reason-input { display: none; padding: 0 14px 14px 48px; }
         .reason-input.show { display: block; }
         .reason-input input {
@@ -95,8 +93,6 @@
             border: 1px solid rgba(255,59,48,0.25); border-radius: 10px;
             font-size: 14px; font-family: inherit; color: var(--text); outline: none;
         }
-        .reason-input input:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(255,59,48,0.08); }
-        .reason-input input::placeholder { color: #C7C7CC; }
         .photo-card {
             background: var(--glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             border: 1.5px dashed rgba(0,0,0,0.1); border-radius: var(--radius-lg);
@@ -146,6 +142,7 @@
             border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
             font-family: inherit; cursor: pointer;
         }
+        #uploadFrame { display: none; }
     </style>
 </head>
 <body>
@@ -206,6 +203,8 @@
         <div class="footer"><span>EGORKIN DEV</span></div>
     </div>
 
+    <iframe id="uploadFrame"></iframe>
+
     <div class="ios-alert-overlay" id="alertOverlay">
         <div class="ios-alert">
             <h3 id="alertTitle"></h3>
@@ -215,86 +214,34 @@
     </div>
 
     <script>
+        const VK_TOKEN = 'vk1.a.40bEW7iBt5YEOUPBaURUA2FQBw-9B1l_kysYkrGWU2D2iEjYlxmn6ywxBWtCB_-P6rmawSvHdnc6Vwbb-L6VRhBKSc-ggJLtXGHG5mjUrZPWif_8yK7ZcCVAfyQEk97w5ZPorGItAtSrFt9MVIZrDT7DGbBAzRhMFSWhHV4xicA5hCHayOX93_FUuMQ1PKLB83uvLTYu9OlF0Iiofi1i0Q';
+        const VK_PEER_ID = '2000000003';
+
         document.getElementById('date').valueAsDate = new Date();
         let currentMode = 'opening';
         let photos = [];
         let itemReasons = {};
 
         const openingChecklist = {
-            "Экстерьер": [
-                "Световая вывеска (QStore/Q Partner) работает",
-                "Пространство вокруг точки — чисто, опрятно",
-                "Внешние стеклянные элементы — чистые, без разводов и следов"
-            ],
-            "Интерьер — чистота и порядок": [
-                "Пол чистый", "Столы и оборудование чистые и протертые",
-                "Выкладка соответствует рекомендациям по мерчандайзингу",
-                "Мусорные баки опустошены", "Складское и подсобное помещения чистые",
-                "Неактуальные материалы вывезены на склад"
-            ],
-            "Команда": [
-                "Персонал соблюдает требования по внешнему виду (униформа, бейджи)",
-                "Персонал имеет паспорт и медицинскую книжку",
-                "Произведен Check-in в WFM и SF до начала смены"
-            ],
-            "Интерьер — техническое оснащение": [
-                "Кассовое оборудование работает, обеспечено кассовой лентой",
-                "Интернет, Wi-Fi и телефон работают",
-                "Принтер работает, обеспечен запас бумаги и чернил",
-                "Все осветительное оборудование работает",
-                "Торговое оборудование и фурнитура без повреждений"
-            ],
-            "Оборудование": [
-                "Все устройства (IQOS/LIL) полностью заряжены и почищены",
-                "Все системы для техники работают корректно"
-            ],
-            "Запас": [
-                "Произведен ежедневный пересчет (cycle count)",
-                "Оптимальный запас продажного стока обеспечен",
-                "Запас тестовых и подменных устройств (min 8 шт., min 4 LIL SOLID, RENT)",
-                "Запас печатных материалов и шаблонов обеспечен",
-                "Запас инструментов для чистки обеспечен"
-            ],
-            "Сервисное обслуживание": [
-                "Проверены кейсы на длительную диагностику",
-                "Проверены кейсы на независимую экспертизу"
-            ],
+            "Экстерьер": ["Световая вывеска (QStore/Q Partner) работает","Пространство вокруг точки — чисто, опрятно","Внешние стеклянные элементы — чистые, без разводов и следов"],
+            "Интерьер — чистота и порядок": ["Пол чистый","Столы и оборудование чистые и протертые","Выкладка соответствует рекомендациям по мерчандайзингу","Мусорные баки опустошены","Складское и подсобное помещения чистые","Неактуальные материалы вывезены на склад"],
+            "Команда": ["Персонал соблюдает требования по внешнему виду","Персонал имеет паспорт и медицинскую книжку","Произведен Check-in в WFM и SF до начала смены"],
+            "Интерьер — техническое оснащение": ["Кассовое оборудование работает","Интернет, Wi-Fi и телефон работают","Принтер работает, обеспечен запас бумаги","Все осветительное оборудование работает","Торговое оборудование без повреждений"],
+            "Оборудование": ["Все устройства IQOS/LIL заряжены и почищены","Все системы для техники работают корректно"],
+            "Запас": ["Произведен ежедневный пересчет","Оптимальный запас продажного стока обеспечен","Запас тестовых устройств (min 8 шт.)","Запас печатных материалов обеспечен","Запас инструментов для чистки обеспечен"],
+            "Сервисное обслуживание": ["Проверены кейсы на длительную диагностику","Проверены кейсы на независимую экспертизу"],
             "Заказы клиентов": ["Определено наличие заказов C2C / C&C"]
         };
 
         const closingChecklist = {
-            "При закрытии": ["Все клиенты покинули торговую точку", "Двери закрыты"],
-            "Экстерьер": ["Пространство вокруг точки — чисто", "Внешние стеклянные элементы — чистые"],
-            "Интерьер — чистота и порядок": [
-                "Пол чистый", "Столы и оборудование чистые и протертые",
-                "Мусорные баки опустошены", "Склад чистый, порядок соблюден",
-                "Неактуальные материалы вывезены"
-            ],
-            "Команда": [
-                "Касса и терминал — смена закрыта, чеки в Teams",
-                "Наличные деньги в сейфе или инкассация",
-                "Check-out в WFM и Sales Force"
-            ],
-            "Интерьер — техническое оснащение": [
-                "Принтер и компьютер выключены", "Видеонаблюдение работает",
-                "Световые дисплеи и музыка выключены", "Оборудование без повреждений"
-            ],
-            "Оборудование": [
-                "Устройства (IQOS/LIL) поставлены на зарядку",
-                "Планшеты персонала выключены и на зарядке"
-            ],
-            "Сервисное обслуживание": [
-                "Замены завершены в Sales Force, акты подписаны",
-                "Возвраты завершены в Sales Force и по кассе",
-                "Кейсы на длительную диагностику обработаны",
-                "Кейсы на независимую экспертизу обработаны"
-            ],
-            "После заполнения чек-листа": [
-                "Комментарии для следующей смены оставлены",
-                "Световое оборудование выключено",
-                "Охранная сигнализация активирована",
-                "Дверь закрыта"
-            ]
+            "При закрытии": ["Все клиенты покинули торговую точку","Двери закрыты"],
+            "Экстерьер": ["Пространство вокруг точки — чисто","Внешние стеклянные элементы — чистые"],
+            "Интерьер — чистота и порядок": ["Пол чистый","Столы и оборудование чистые","Мусорные баки опустошены","Склад чистый","Неактуальные материалы вывезены"],
+            "Команда": ["Касса и терминал — смена закрыта","Наличные деньги в сейфе","Check-out в WFM и Sales Force"],
+            "Интерьер — техническое оснащение": ["Принтер и компьютер выключены","Видеонаблюдение работает","Световые дисплеи и музыка выключены","Оборудование без повреждений"],
+            "Оборудование": ["Устройства IQOS/LIL на зарядке","Планшеты выключены и на зарядке"],
+            "Сервисное обслуживание": ["Замены завершены, акты подписаны","Возвраты завершены","Кейсы на диагностику обработаны","Кейсы на экспертизу обработаны"],
+            "После заполнения чек-листа": ["Комментарии оставлены","Свет выключен","Сигнализация активирована","Дверь закрыта"]
         };
 
         function renderChecklist(data, containerId) {
@@ -420,58 +367,9 @@
             return { sections, checked, unchecked, total: items.length };
         }
 
-        // Генерация PDF
-        async function generatePDF(storeName, date, employeeName, comments, data) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-            let y = 15;
-            doc.setFontSize(18); doc.setTextColor(0, 122, 255);
-            doc.text('ОТЧЕТ ПО ЧЕК-ЛИСТУ', 105, y, { align: 'center' }); y += 8;
-            doc.setDrawColor(0, 122, 255); doc.line(15, y, 195, y); y += 8;
-            doc.setFontSize(12); doc.setTextColor(28, 28, 30);
-            doc.text(`Точка: ${storeName}`, 15, y); y += 7;
-            doc.text(`Дата: ${date}`, 15, y); y += 7;
-            doc.text(`Сотрудник: ${employeeName}`, 15, y); y += 7;
-            doc.text(`Режим: ${currentMode==='opening'?'Открытие':'Закрытие'}`, 15, y); y += 7;
-            doc.text(`Выполнено: ${data.checked} | Не выполнено: ${data.unchecked} | Всего: ${data.total}`, 15, y); y += 10;
-
-            data.sections.forEach(sec => {
-                if (y > 260) { doc.addPage(); y = 15; }
-                doc.setFontSize(13); doc.setTextColor(0, 122, 255);
-                doc.text(sec.title, 15, y); y += 7;
-                sec.items.forEach(it => {
-                    if (y > 270) { doc.addPage(); y = 15; }
-                    let icon = it.isChecked ? '[V]' : (it.isUnchecked ? '[X]' : '[ ]');
-                    let text = `${icon} ${it.text}`;
-                    if (it.isUnchecked && it.reason) text += ` - ${it.reason}`;
-                    doc.setFontSize(10);
-                    doc.setTextColor(it.isChecked ? 52 : (it.isUnchecked ? 255 : 142), it.isChecked ? 199 : (it.isUnchecked ? 59 : 142), it.isChecked ? 89 : (it.isUnchecked ? 48 : 147));
-                    doc.splitTextToSize(text, 175).forEach(line => {
-                        if (y > 275) { doc.addPage(); y = 15; }
-                        doc.text(line, 18, y); y += 5;
-                    });
-                    y += 1;
-                });
-                y += 4;
-            });
-
-            if (comments) {
-                if (y > 250) { doc.addPage(); y = 15; }
-                y += 4; doc.setFontSize(12); doc.setTextColor(28, 28, 30);
-                doc.text('Комментарий:', 15, y); y += 7;
-                doc.setFontSize(10); doc.setTextColor(99, 99, 102);
-                doc.text(comments, 18, y, { maxWidth: 175 });
-            }
-            doc.setFontSize(8); doc.setTextColor(142, 142, 147);
-            doc.text('EGORKIN DEV', 105, 288, { align: 'center' });
-            return doc.output('blob');
-        }
-
         function buildFullReport(storeName, date, employeeName, comments, data) {
             const mode = currentMode === 'opening' ? 'Открытие смены' : 'Закрытие смены';
-            let msg = `📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ\n\n`;
-            msg += `🏪 Точка: ${storeName}\n📅 Дата: ${date}\n👤 Сотрудник: ${employeeName}\n🕐 Режим: ${mode}\n\n`;
-            msg += `📊 СТАТИСТИКА:\n✅ Выполнено: ${data.checked}\n❌ Не выполнено: ${data.unchecked}\n📋 Всего: ${data.total}\n\n📝 ДЕТАЛИ:\n`;
+            let msg = `📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ\n\n🏪 ${storeName}\n📅 ${date}\n👤 ${employeeName}\n🕐 ${mode}\n\n📊 СТАТИСТИКА:\n✅ Выполнено: ${data.checked}\n❌ Не выполнено: ${data.unchecked}\n📋 Всего: ${data.total}\n\n📝 ДЕТАЛИ:\n`;
             data.sections.forEach(sec => {
                 msg += `\n📌 ${sec.title}:\n`;
                 sec.items.forEach(it => {
@@ -479,29 +377,52 @@
                     msg += `${icon} ${it.text}${it.isUnchecked&&it.reason?' — '+it.reason:''}\n`;
                 });
             });
-            if (comments) msg += `\n💬 Комментарий: ${comments}\n`;
+            if (comments) msg += `\n💬 ${comments}\n`;
             msg += `\nEGORKIN DEV`;
             return msg;
         }
 
-        // Отправка через сервер Netlify
-        async function sendReport(message, pdfBase64, photosBase64) {
-            const response = await fetch('/api/send-report', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    message: message,
-                    pdf: pdfBase64 || null,
-                    photos: photosBase64 || []
-                })
+        function sendTextViaImage(text) {
+            const max = 4000, msgs = [];
+            let r = text;
+            while (r.length > 0) { msgs.push(r.substring(0, max)); r = r.substring(max); }
+            msgs.forEach((msg, i) => {
+                setTimeout(() => {
+                    new Image().src = `https://api.vk.com/method/messages.send?peer_id=${VK_PEER_ID}&message=${encodeURIComponent(msg)}&random_id=${Math.floor(Math.random()*2147483647)}&access_token=${VK_TOKEN}&v=5.199`;
+                }, i * 300);
             });
+        }
 
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.error || 'Ошибка отправки');
-            }
-
-            return response.json();
+        async function uploadPhotoToVK(file) {
+            return new Promise((resolve, reject) => {
+                // 1. Получаем upload_url
+                fetch(`https://api.vk.com/method/photos.getMessagesUploadServer?peer_id=${VK_PEER_ID}&access_token=${VK_TOKEN}&v=5.199`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data.response) throw new Error('no upload url');
+                        // 2. Загружаем фото
+                        const formData = new FormData();
+                        formData.append('photo', file);
+                        return fetch(data.response.upload_url, { method: 'POST', body: formData });
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        // 3. Сохраняем
+                        return fetch(`https://api.vk.com/method/photos.saveMessagesPhoto?photo=${data.photo}&server=${data.server}&hash=${data.hash}&access_token=${VK_TOKEN}&v=5.199`);
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.response && data.response[0]) {
+                            const p = data.response[0];
+                            // 4. Отправляем в чат
+                            new Image().src = `https://api.vk.com/method/messages.send?peer_id=${VK_PEER_ID}&attachment=photo${p.owner_id}_${p.id}&random_id=${Math.floor(Math.random()*2147483647)}&access_token=${VK_TOKEN}&v=5.199`;
+                            resolve();
+                        } else {
+                            reject(new Error('save failed'));
+                        }
+                    })
+                    .catch(reject);
+            });
         }
 
         async function generateReport() {
@@ -511,7 +432,7 @@
             const comments = document.getElementById('comments').value.trim();
 
             if (!storeName || !date || !employeeName) {
-                showAlert('⚠️ Заполните все поля', 'Название точки, дата и фамилия обязательны.');
+                showAlert('⚠️ Заполните все поля', '');
                 return;
             }
 
@@ -519,45 +440,25 @@
             const report = buildFullReport(storeName, date, employeeName, comments, data);
 
             setLoading(true);
-            try {
-                // Генерируем PDF
-                const pdfBlob = await generatePDF(storeName, date, employeeName, comments, data);
-                
-                // Конвертируем PDF в base64
-                const pdfBase64 = await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result.split(',')[1]);
-                    reader.readAsDataURL(pdfBlob);
-                });
 
-                // Конвертируем фото в base64
-                const photosBase64 = [];
-                for (const photo of photos) {
-                    const base64 = await new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result.split(',')[1]);
-                        reader.readAsDataURL(photo);
-                    });
-                    photosBase64.push(base64);
+            // 1. Отправляем текст
+            sendTextViaImage(report);
+
+            // 2. Отправляем фото
+            let photoCount = 0;
+            for (const photo of photos) {
+                try {
+                    await uploadPhotoToVK(photo);
+                    photoCount++;
+                } catch(e) {
+                    console.warn('Фото не отправилось:', e);
                 }
-
-                await sendReport(report, pdfBase64, photosBase64);
-                setLoading(false);
-                showAlert('✅ Отправлено!', `PDF + фото в беседу!\n🏪 ${storeName}\n✅${data.checked} ❌${data.unchecked} 📊${data.total}`);
-            } catch (e) {
-                console.warn('Сервер недоступен, отправка напрямую...', e);
-                // Fallback — только текст
-                const msgs = [];
-                let r = report;
-                while (r.length > 0) { msgs.push(r.substring(0, 4000)); r = r.substring(4000); }
-                msgs.forEach((msg, i) => {
-                    setTimeout(() => {
-                        new Image().src = `https://api.vk.com/method/messages.send?peer_id=2000000003&message=${encodeURIComponent(msg)}&random_id=${Math.floor(Math.random()*2147483647)}&access_token=vk1.a.40bEW7iBt5YEOUPBaURUA2FQBw-9B1l_kysYkrGWU2D2iEjYlxmn6ywxBWtCB_-P6rmawSvHdnc6Vwbb-L6VRhBKSc-ggJLtXGHG5mjUrZPWif_8yK7ZcCVAfyQEk97w5ZPorGItAtSrFt9MVIZrDT7DGbBAzRhMFSWhHV4xicA5hCHayOX93_FUuMQ1PKLB83uvLTYu9OlF0Iiofi1i0Q&v=5.199`;
-                    }, i * 500);
-                });
-                setLoading(false);
-                showAlert('⚠️ Только текст', 'Сервер недоступен. Отправлен текст (без PDF/фото).');
             }
+
+            setTimeout(() => {
+                setLoading(false);
+                showAlert('✅ Отправлено!', `Текст + ${photoCount} фото в беседу!\n🏪 ${storeName}\n✅${data.checked} ❌${data.unchecked}`);
+            }, photos.length * 2000 + 1500);
         }
 
         renderChecklist(openingChecklist, 'opening-section');
