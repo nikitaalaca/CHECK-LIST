@@ -8,18 +8,15 @@
         :root {
             --glass-bg: rgba(255, 255, 255, 0.72);
             --glass-border: rgba(255, 255, 255, 0.5);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
             --blue: #007AFF;
             --green: #34C759;
             --red: #FF3B30;
-            --orange: #FF9500;
             --gray: #8E8E93;
-            --gray-light: #F2F2F7;
             --text: #1C1C1E;
             --text-secondary: #636366;
-            --radius-sm: 12px;
-            --radius: 16px;
-            --radius-lg: 20px;
+            --radius: 14px;
+            --radius-lg: 18px;
+            --padding: 14px 16px;
             --transition: 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
@@ -39,7 +36,6 @@
             padding: 0;
             color: var(--text);
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
         .bg-decoration {
@@ -51,26 +47,19 @@
             z-index: 0;
         }
         .bg-decoration:nth-child(1) {
-            width: 300px;
-            height: 300px;
+            width: 300px; height: 300px;
             background: radial-gradient(circle, rgba(0,122,255,0.25) 0%, transparent 70%);
-            top: -80px;
-            right: -60px;
+            top: -80px; right: -60px;
         }
         .bg-decoration:nth-child(2) {
-            width: 250px;
-            height: 250px;
+            width: 250px; height: 250px;
             background: radial-gradient(circle, rgba(52,199,89,0.2) 0%, transparent 70%);
-            bottom: 10%;
-            left: -70px;
+            bottom: 10%; left: -70px;
         }
         .bg-decoration:nth-child(3) {
-            width: 200px;
-            height: 200px;
+            width: 200px; height: 200px;
             background: radial-gradient(circle, rgba(255,149,0,0.15) 0%, transparent 70%);
-            top: 40%;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 40%; left: 50%; transform: translateX(-50%);
         }
 
         .container {
@@ -83,12 +72,11 @@
 
         .header {
             text-align: center;
-            padding: 24px 0 8px;
-            position: relative;
+            padding: 24px 0 10px;
         }
         .header-icon {
             font-size: 40px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             animation: float 3s ease-in-out infinite;
         }
         @keyframes float {
@@ -100,7 +88,6 @@
             font-weight: 700;
             letter-spacing: -0.5px;
             color: var(--text);
-            margin: 0;
         }
         .header .subtitle {
             font-size: 14px;
@@ -109,29 +96,30 @@
             margin-top: 2px;
         }
 
+        /* Карточка */
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(25px) saturate(180%);
             -webkit-backdrop-filter: blur(25px) saturate(180%);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
-            padding: 18px 16px;
-            margin-bottom: 14px;
-            box-shadow: var(--glass-shadow);
-            transition: transform var(--transition), box-shadow var(--transition);
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
         }
 
         .card-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
             color: var(--gray);
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
+        /* ЕДИНЫЙ СТИЛЬ ДЛЯ ВСЕХ INPUT */
         .input-group {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         .input-group:last-child {
             margin-bottom: 0;
@@ -141,16 +129,17 @@
             font-size: 13px;
             font-weight: 500;
             color: var(--text-secondary);
-            margin-bottom: 4px;
-            padding-left: 2px;
+            margin-bottom: 5px;
+            padding-left: 1px;
         }
         .input-group input,
         .input-group textarea {
             width: 100%;
-            padding: 13px 14px;
-            background: rgba(242, 242, 247, 0.7);
-            border: 1px solid rgba(0,0,0,0.08);
-            border-radius: var(--radius-sm);
+            height: 46px;
+            padding: 0 14px;
+            background: rgba(242, 242, 247, 0.8);
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: var(--radius);
             font-size: 16px;
             font-family: inherit;
             color: var(--text);
@@ -158,76 +147,86 @@
             outline: none;
             -webkit-user-select: text;
             user-select: text;
+            line-height: 46px;
         }
+        .input-group textarea {
+            height: auto;
+            min-height: 80px;
+            padding: 12px 14px;
+            line-height: 1.4;
+            resize: vertical;
+        }
+        /* Поле даты — такой же размер как остальные */
         .input-group input[type="date"] {
-            max-width: 200px;
-            padding: 10px 14px;
-            font-size: 15px;
+            height: 46px;
+            padding: 0 14px;
+            font-size: 16px;
+            line-height: 46px;
+            -webkit-appearance: none;
+            appearance: none;
         }
         .input-group input:focus,
         .input-group textarea:focus {
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.95);
             border-color: var(--blue);
-            box-shadow: 0 0 0 3px rgba(0,122,255,0.15);
-        }
-        .input-group textarea {
-            resize: vertical;
-            min-height: 70px;
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
         }
 
+        /* Сегментированный контрол */
         .segmented-control {
             display: flex;
-            background: rgba(0,0,0,0.05);
-            border-radius: 10px;
+            background: rgba(0,0,0,0.04);
+            border-radius: 11px;
             padding: 3px;
             margin-bottom: 14px;
         }
         .segmented-btn {
             flex: 1;
-            padding: 10px 8px;
+            padding: 11px 10px;
             border: none;
             background: transparent;
             font-size: 14px;
             font-weight: 600;
             color: var(--text-secondary);
-            border-radius: 8px;
+            border-radius: 9px;
             cursor: pointer;
             transition: all var(--transition);
             font-family: inherit;
-            white-space: nowrap;
         }
         .segmented-btn.active {
             background: white;
             color: var(--text);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1), 0 0 0 0.5px rgba(0,0,0,0.04);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
         }
 
+        /* Секции */
         .section {
             display: none;
-            animation: fadeSlideIn 0.35s ease;
+            animation: fadeSlideIn 0.3s ease;
         }
         .section.active {
             display: block;
         }
         @keyframes fadeSlideIn {
-            from { opacity: 0; transform: translateY(8px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Заголовок секции */
         .checklist-section-title {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             color: var(--text);
-            margin: 16px 0 8px;
-            padding-left: 2px;
+            margin: 14px 0 8px;
+            padding-left: 1px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
         .checklist-section-title::before {
             content: '';
-            width: 4px;
-            height: 18px;
+            width: 3px;
+            height: 16px;
             background: var(--blue);
             border-radius: 2px;
             flex-shrink: 0;
@@ -239,34 +238,29 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.6);
-            border-radius: var(--radius-sm);
+            border-radius: var(--radius);
             margin-bottom: 6px;
-            transition: all var(--transition);
             overflow: hidden;
+            transition: all var(--transition);
+        }
+        .checklist-item.checked {
+            background: rgba(52,199,89,0.08);
+            border-color: rgba(52,199,89,0.2);
+        }
+        .checklist-item.unchecked {
+            background: rgba(255,59,48,0.06);
+            border-color: rgba(255,59,48,0.18);
         }
 
         .checklist-item-main {
             display: flex;
             align-items: center;
             padding: 13px 14px;
-            cursor: pointer;
-            gap: 12px;
-            transition: all var(--transition);
-        }
-        .checklist-item-main:active {
-            transform: scale(0.985);
-            background: rgba(255,255,255,0.75);
+            gap: 11px;
+            cursor: default;
         }
 
-        .checklist-item.checked {
-            background: rgba(52,199,89,0.1);
-            border-color: rgba(52,199,89,0.25);
-        }
-        .checklist-item.unchecked {
-            background: rgba(255,59,48,0.08);
-            border-color: rgba(255,59,48,0.2);
-        }
-
+        /* Чекбокс */
         .checkbox-custom {
             width: 22px;
             height: 22px;
@@ -276,50 +270,42 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all var(--transition);
+            transition: all 0.2s ease;
             background: white;
         }
         .checklist-item.checked .checkbox-custom {
             background: var(--green);
             border-color: var(--green);
-            animation: popIn 0.3s ease;
+            animation: pop 0.25s ease;
         }
         .checklist-item.unchecked .checkbox-custom {
             background: var(--red);
             border-color: var(--red);
-            animation: popIn 0.3s ease;
+            animation: pop 0.25s ease;
         }
-        @keyframes popIn {
-            0% { transform: scale(0.7); }
-            60% { transform: scale(1.1); }
+        @keyframes pop {
+            0% { transform: scale(0.75); }
+            50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
-
-        .checkbox-custom svg.check-icon {
-            opacity: 0;
-            transition: opacity 0.15s ease;
-        }
-        .checklist-item.checked .checkbox-custom svg.check-icon {
-            opacity: 1;
-        }
-
-        .checkbox-custom svg.cross-icon {
-            opacity: 0;
-            transition: opacity 0.15s ease;
-        }
-        .checklist-item.unchecked .checkbox-custom svg.cross-icon {
-            opacity: 1;
-        }
-
-        .checklist-item input[type="checkbox"] {
+        .checkbox-custom .icon-check {
             display: none;
         }
-        .checklist-item .item-text {
+        .checklist-item.checked .checkbox-custom .icon-check {
+            display: block;
+        }
+        .checkbox-custom .icon-cross {
+            display: none;
+        }
+        .checklist-item.unchecked .checkbox-custom .icon-cross {
+            display: block;
+        }
+
+        .item-text {
             flex: 1;
             font-size: 15px;
-            line-height: 1.35;
+            line-height: 1.3;
             color: var(--text);
-            transition: color var(--transition);
         }
         .checklist-item.checked .item-text {
             color: #8E8E93;
@@ -328,54 +314,57 @@
         /* Кнопки действий */
         .item-actions {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             flex-shrink: 0;
         }
         .action-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            border: 1.5px solid rgba(0,0,0,0.1);
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            border: 1.5px solid rgba(0,0,0,0.08);
             background: white;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
-            transition: all var(--transition);
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s ease;
             flex-shrink: 0;
+            font-family: inherit;
         }
         .action-btn:active {
-            transform: scale(0.9);
+            transform: scale(0.92);
         }
-        .action-btn.btn-yes {
+        .btn-yes {
             border-color: rgba(52,199,89,0.3);
             color: var(--green);
         }
-        .action-btn.btn-yes:hover {
-            background: rgba(52,199,89,0.1);
+        .btn-yes:hover {
+            background: rgba(52,199,89,0.08);
         }
-        .action-btn.btn-no {
+        .btn-no {
             border-color: rgba(255,59,48,0.3);
             color: var(--red);
         }
-        .action-btn.btn-no:hover {
-            background: rgba(255,59,48,0.1);
+        .btn-no:hover {
+            background: rgba(255,59,48,0.08);
         }
 
-        /* Пояснение причины */
+        /* Причина */
         .reason-input {
             display: none;
-            padding: 0 14px 13px 48px;
+            padding: 0 14px 14px 47px;
         }
         .reason-input.show {
             display: block;
-            animation: fadeSlideIn 0.3s ease;
+            animation: fadeSlideIn 0.25s ease;
         }
         .reason-input input {
             width: 100%;
-            padding: 10px 12px;
-            background: rgba(242, 242, 247, 0.8);
+            height: 40px;
+            padding: 0 12px;
+            background: rgba(255,255,255,0.8);
             border: 1px solid rgba(255,59,48,0.2);
             border-radius: 10px;
             font-size: 14px;
@@ -387,52 +376,32 @@
         }
         .reason-input input:focus {
             border-color: var(--red);
-            box-shadow: 0 0 0 3px rgba(255,59,48,0.1);
+            box-shadow: 0 0 0 3px rgba(255,59,48,0.08);
         }
         .reason-input input::placeholder {
             color: #C7C7CC;
+            font-size: 13px;
         }
 
-        /* Статус-метка */
-        .status-badge {
-            display: none;
-            font-size: 11px;
-            font-weight: 600;
-            padding: 3px 8px;
-            border-radius: 6px;
-            margin-left: 48px;
-            margin-bottom: 8px;
-        }
-        .status-badge.show {
-            display: inline-block;
-        }
-        .status-badge.badge-no {
-            background: rgba(255,59,48,0.1);
-            color: var(--red);
-        }
-
+        /* Фото */
         .photo-card {
             background: var(--glass-bg);
             backdrop-filter: blur(25px) saturate(180%);
             -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border: 1.5px dashed rgba(0,0,0,0.12);
-            border-radius: var(--radius);
-            padding: 24px;
+            border: 1.5px dashed rgba(0,0,0,0.1);
+            border-radius: var(--radius-lg);
+            padding: 22px;
             text-align: center;
             cursor: pointer;
             transition: all var(--transition);
             margin-bottom: 14px;
         }
-        .photo-card:hover {
-            border-color: var(--blue);
-            background: rgba(0,122,255,0.04);
-        }
         .photo-card:active {
             transform: scale(0.98);
         }
         .photo-card .photo-icon {
-            font-size: 32px;
-            margin-bottom: 6px;
+            font-size: 30px;
+            margin-bottom: 4px;
         }
         .photo-card .photo-label {
             font-size: 15px;
@@ -454,79 +423,72 @@
             margin-top: 10px;
         }
         .photo-preview .preview-item {
-            width: 64px;
-            height: 64px;
+            width: 60px;
+            height: 60px;
             border-radius: 10px;
             object-fit: cover;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-            animation: popIn 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
+        /* Кнопка отправки */
         .submit-btn {
             width: 100%;
-            padding: 15px;
+            height: 52px;
             background: var(--blue);
             color: white;
             border: none;
-            border-radius: 14px;
+            border-radius: var(--radius);
             font-size: 17px;
             font-weight: 600;
             font-family: inherit;
             cursor: pointer;
             transition: all var(--transition);
-            box-shadow: 0 4px 16px rgba(0,122,255,0.3);
-            letter-spacing: -0.2px;
+            box-shadow: 0 4px 16px rgba(0,122,255,0.25);
             position: relative;
-            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
         .submit-btn:active {
             transform: scale(0.97);
-            box-shadow: 0 2px 8px rgba(0,122,255,0.2);
-        }
-        .submit-btn:disabled {
-            background: #AEAEB2;
-            box-shadow: none;
-            cursor: not-allowed;
         }
         .submit-btn.loading {
             pointer-events: none;
             opacity: 0.8;
         }
-        .submit-btn .loader {
+        .loader {
             display: none;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border: 2px solid rgba(255,255,255,0.3);
             border-top-color: white;
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
+            animation: spin 0.7s linear infinite;
+            margin-left: 6px;
         }
         .submit-btn.loading .loader {
-            display: block;
+            display: inline-block;
         }
         @keyframes spin {
-            to { transform: translateY(-50%) rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
 
+        /* Счетчик */
         .counter {
             text-align: center;
-            margin-top: 12px;
+            margin-top: 10px;
             font-size: 13px;
             font-weight: 600;
             color: var(--gray);
-            letter-spacing: 0.3px;
         }
-        .counter .progress-ring {
+        .counter .dot {
             display: inline-block;
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background: var(--green);
-            margin-right: 6px;
+            margin-right: 5px;
             animation: pulse 1.5s ease-in-out infinite;
         }
         @keyframes pulse {
@@ -537,24 +499,23 @@
         /* Footer */
         .footer {
             text-align: center;
-            padding: 20px 0 10px;
-            font-size: 12px;
+            padding: 20px 0 8px;
+            font-size: 11px;
             font-weight: 600;
             color: var(--gray);
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
         }
         .footer span {
-            background: rgba(0,0,0,0.04);
-            padding: 8px 16px;
+            background: rgba(0,0,0,0.03);
+            padding: 7px 18px;
             border-radius: 20px;
         }
 
+        /* Алерт */
         .ios-alert-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0,0,0,0.4);
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
@@ -573,7 +534,7 @@
             border-radius: 20px;
             padding: 24px 20px;
             width: 85%;
-            max-width: 360px;
+            max-width: 350px;
             text-align: center;
             box-shadow: 0 20px 60px rgba(0,0,0,0.2);
             animation: alertIn 0.3s ease;
@@ -592,11 +553,10 @@
             margin-bottom: 18px;
             line-height: 1.4;
             white-space: pre-wrap;
-            word-break: break-word;
         }
         .ios-alert button {
             width: 100%;
-            padding: 12px;
+            height: 44px;
             background: var(--blue);
             color: white;
             border: none;
@@ -605,9 +565,6 @@
             font-weight: 600;
             font-family: inherit;
             cursor: pointer;
-        }
-        .ios-alert button:active {
-            opacity: 0.7;
         }
     </style>
 </head>
@@ -623,7 +580,6 @@
             <div class="subtitle">Открытие и закрытие торговой точки</div>
         </div>
 
-        <!-- Карточка с данными -->
         <div class="card">
             <div class="card-title">Данные точки</div>
             <div class="input-group">
@@ -640,27 +596,21 @@
             </div>
         </div>
 
-        <!-- Переключатель режима -->
         <div class="segmented-control">
             <button class="segmented-btn active" onclick="switchMode('opening')">🔓 Открытие</button>
             <button class="segmented-btn" onclick="switchMode('closing')">🔒 Закрытие</button>
         </div>
 
-        <!-- Секция открытия -->
         <div id="opening-section" class="section active"></div>
-
-        <!-- Секция закрытия -->
         <div id="closing-section" class="section"></div>
 
-        <!-- Комментарии -->
-        <div class="card" style="margin-top: 14px;">
+        <div class="card" style="margin-top: 12px;">
             <div class="card-title">💬 Комментарий</div>
             <div class="input-group">
                 <textarea id="comments" rows="2" placeholder="Оставьте комментарий для следующей смены..."></textarea>
             </div>
         </div>
 
-        <!-- Фото -->
         <div class="photo-card" onclick="document.getElementById('photoInput').click()">
             <div class="photo-icon">📸</div>
             <div class="photo-label">Добавить фото</div>
@@ -669,43 +619,41 @@
             <div class="photo-preview" id="photoPreview"></div>
         </div>
 
-        <!-- Кнопка -->
         <button class="submit-btn" id="submitBtn" onclick="generateReport()">
             <span id="submitText">📤 Отправить отчет</span>
             <div class="loader"></div>
         </button>
 
-        <!-- Счетчик -->
         <div class="counter" id="counter">
-            <span class="progress-ring"></span>
+            <span class="dot"></span>
             <span id="counterText">Выполнено: 0 из 0</span>
         </div>
 
-        <!-- Подпись -->
         <div class="footer">
             <span>EGORKIN DEV</span>
         </div>
     </div>
 
-    <!-- Алерт -->
     <div class="ios-alert-overlay" id="alertOverlay">
         <div class="ios-alert">
-            <h3 id="alertTitle">✅ Отчет готов</h3>
+            <h3 id="alertTitle"></h3>
             <p id="alertMessage"></p>
             <button onclick="closeAlert()">OK</button>
         </div>
     </div>
 
     <script>
+        // ============ НАСТРОЙКИ ============
         const BOT_TOKEN = '8920306780:AAHSc7YbrF7nqiT9aSD59_31Fq-j8MKy4n0';
-        const CHAT_ID = '1467435264';
+        const CHAT_ID = '@-1001467435264'; // Формат для канала: @username или -100id
+        // Если chat_id числовой (как твой 1467435264), для канала нужно добавить -100 впереди: -1001467435264
+        const ACTUAL_CHAT_ID = '-1001467435264'; // <- ИСПРАВЬ ЕСЛИ НУЖНО
+        // =================================
 
         document.getElementById('date').valueAsDate = new Date();
 
         let currentMode = 'opening';
         let photos = [];
-
-        // Хранилище причин "не выполнено"
         let itemReasons = {};
 
         const openingChecklist = {
@@ -816,23 +764,23 @@
                     div.className = 'checklist-item';
                     div.setAttribute('data-item-id', itemId);
                     div.innerHTML = `
-                        <div class="checklist-item-main" onclick="event.stopPropagation();">
+                        <div class="checklist-item-main">
                             <div class="checkbox-custom">
-                                <svg class="check-icon" width="14" height="11" viewBox="0 0 14 11" fill="none">
-                                    <path d="M1 5.5L5 9.5L13 1.5" stroke="white" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+                                <svg class="icon-check" width="13" height="10" viewBox="0 0 13 10" fill="none">
+                                    <path d="M1 5L4.5 8.5L12 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                <svg class="cross-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                    <path d="M1 1L11 11M11 1L1 11" stroke="white" stroke-width="2.3" stroke-linecap="round"/>
+                                <svg class="icon-cross" width="11" height="11" viewBox="0 0 11 11" fill="none">
+                                    <path d="M1 1L10 10M10 1L1 10" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
                                 </svg>
                             </div>
                             <span class="item-text">${item}</span>
                             <div class="item-actions">
-                                <button class="action-btn btn-yes" onclick="event.stopPropagation(); markItem('${itemId}', 'yes')" title="Выполнено">✓</button>
-                                <button class="action-btn btn-no" onclick="event.stopPropagation(); markItem('${itemId}', 'no')" title="Не выполнено">✕</button>
+                                <button class="action-btn btn-yes" onclick="event.stopPropagation(); markItem('${itemId}', 'yes')">✓</button>
+                                <button class="action-btn btn-no" onclick="event.stopPropagation(); markItem('${itemId}', 'no')">✕</button>
                             </div>
                         </div>
                         <div class="reason-input" id="reason-${itemId}">
-                            <input type="text" placeholder="Укажите причину невыполнения..." oninput="updateReason('${itemId}', this.value)">
+                            <input type="text" placeholder="Причина невыполнения..." oninput="updateReason('${itemId}', this.value)">
                         </div>
                     `;
                     container.appendChild(div);
@@ -844,23 +792,17 @@
             const item = document.querySelector(`[data-item-id="${itemId}"]`);
             const reasonInput = document.getElementById(`reason-${itemId}`);
 
-            // Сбрасываем классы
             item.classList.remove('checked', 'unchecked');
 
             if (status === 'yes') {
                 item.classList.add('checked');
                 reasonInput.classList.remove('show');
                 delete itemReasons[itemId];
-            } else if (status === 'no') {
+            } else {
                 item.classList.add('unchecked');
                 reasonInput.classList.add('show');
-                // Фокусируем поле ввода
-                setTimeout(() => {
-                    reasonInput.querySelector('input').focus();
-                }, 100);
-                if (!itemReasons[itemId]) {
-                    itemReasons[itemId] = '';
-                }
+                setTimeout(() => reasonInput.querySelector('input').focus(), 100);
+                if (!itemReasons[itemId]) itemReasons[itemId] = '';
             }
 
             updateCounter();
@@ -872,18 +814,16 @@
 
         function updateCounter() {
             const activeSection = currentMode === 'opening' ? 'opening-section' : 'closing-section';
-            const allItems = document.querySelectorAll(`#${activeSection} .checklist-item`);
-            const checkedItems = document.querySelectorAll(`#${activeSection} .checklist-item.checked`);
-            const uncheckedItems = document.querySelectorAll(`#${activeSection} .checklist-item.unchecked`);
-            document.getElementById('counterText').textContent =
-                `✅ ${checkedItems.length} | ❌ ${uncheckedItems.length} | Всего: ${allItems.length}`;
+            const all = document.querySelectorAll(`#${activeSection} .checklist-item`).length;
+            const checked = document.querySelectorAll(`#${activeSection} .checklist-item.checked`).length;
+            const unchecked = document.querySelectorAll(`#${activeSection} .checklist-item.unchecked`).length;
+            document.getElementById('counterText').textContent = `✅ ${checked} | ❌ ${unchecked} | Всего: ${all}`;
         }
 
         function switchMode(mode) {
             currentMode = mode;
-            document.querySelectorAll('.segmented-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.segmented-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.segmented-btn')[mode === 'opening' ? 0 : 1].classList.add('active');
-
             document.getElementById('opening-section').classList.toggle('active', mode === 'opening');
             document.getElementById('closing-section').classList.toggle('active', mode === 'closing');
             updateCounter();
@@ -894,12 +834,11 @@
             const preview = document.getElementById('photoPreview');
             preview.innerHTML = '';
             photos = [];
-
             for (let file of files) {
                 if (file.type.startsWith('image/')) {
                     photos.push(file);
                     const reader = new FileReader();
-                    reader.onload = function(e) {
+                    reader.onload = e => {
                         const img = document.createElement('img');
                         img.src = e.target.result;
                         img.className = 'preview-item';
@@ -920,12 +859,12 @@
             document.getElementById('alertOverlay').classList.remove('show');
         }
 
-        function setLoading(isLoading) {
+        function setLoading(loading) {
             const btn = document.getElementById('submitBtn');
             const text = document.getElementById('submitText');
-            if (isLoading) {
+            if (loading) {
                 btn.classList.add('loading');
-                text.textContent = 'Отправка...';
+                text.textContent = 'Отправка';
             } else {
                 btn.classList.remove('loading');
                 text.textContent = '📤 Отправить отчет';
@@ -934,116 +873,32 @@
 
         async function sendToTelegram(text, photoFiles) {
             const textUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-            const textResponse = await fetch(textUrl, {
+            const res = await fetch(textUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    chat_id: CHAT_ID,
+                    chat_id: ACTUAL_CHAT_ID,
                     text: text,
                     parse_mode: 'HTML'
                 })
             });
-
-            if (!textResponse.ok) {
-                const err = await textResponse.json();
-                throw new Error(err.description || 'Ошибка отправки текста');
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.description || 'Ошибка отправки');
             }
 
             if (photoFiles && photoFiles.length > 0) {
                 for (const photo of photoFiles) {
-                    const formData = new FormData();
-                    formData.append('chat_id', CHAT_ID);
-                    formData.append('photo', photo);
-
-                    const photoUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`;
-                    const photoResponse = await fetch(photoUrl, {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    if (!photoResponse.ok) {
-                        console.warn('Не удалось отправить фото:', await photoResponse.json());
-                    }
+                    const fd = new FormData();
+                    fd.append('chat_id', ACTUAL_CHAT_ID);
+                    fd.append('photo', photo);
+                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
                 }
             }
-
-            return true;
         }
 
-        function escapeHTML(text) {
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return text.replace(/[&<>"']/g, m => map[m]);
-        }
-
-        function collectReportData() {
-            const activeSection = currentMode === 'opening' ? 'opening-section' : 'closing-section';
-            const items = document.querySelectorAll(`#${activeSection} .checklist-item`);
-            const sectionHeaders = document.querySelectorAll(`#${activeSection} .checklist-section-title`);
-
-            let checkedCount = 0;
-            let uncheckedCount = 0;
-
-            // Определяем порядок секций и их элементов
-            let reportSections = [];
-            let currentSectionData = null;
-
-            sectionHeaders.forEach(header => {
-                if (currentSectionData) {
-                    reportSections.push(currentSectionData);
-                }
-                currentSectionData = {
-                    title: header.textContent,
-                    items: []
-                };
-            });
-
-            // Распределяем элементы по секциям
-            let sectionIndex = -1;
-            items.forEach(item => {
-                const itemId = item.getAttribute('data-item-id');
-                const isChecked = item.classList.contains('checked');
-                const isUnchecked = item.classList.contains('unchecked');
-                const text = item.querySelector('.item-text').textContent;
-                const reason = itemReasons[itemId] || '';
-
-                if (isChecked) checkedCount++;
-                if (isUnchecked) uncheckedCount++;
-
-                // Определяем к какой секции относится элемент
-                // Ищем ближайший заголовок перед этим элементом
-                for (let j = sectionHeaders.length - 1; j >= 0; j--) {
-                    if (sectionHeaders[j].compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING) {
-                        sectionIndex = j;
-                        break;
-                    }
-                }
-
-                if (sectionIndex >= 0 && sectionIndex < reportSections.length) {
-                    reportSections[sectionIndex].items.push({
-                        text,
-                        isChecked,
-                        isUnchecked,
-                        reason
-                    });
-                }
-            });
-
-            if (currentSectionData) {
-                reportSections.push(currentSectionData);
-            }
-
-            return {
-                reportSections,
-                checkedCount,
-                uncheckedCount,
-                total: items.length
-            };
+        function esc(s) {
+            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
 
         async function generateReport() {
@@ -1053,56 +908,79 @@
             const comments = document.getElementById('comments').value.trim();
 
             if (!storeName || !date || !employeeName) {
-                showAlert('⚠️ Не все поля заполнены', 'Пожалуйста, укажите название точки, дату и фамилию сотрудника.');
+                showAlert('⚠️ Не все поля заполнены', 'Укажите название точки, дату и фамилию.');
                 return;
             }
 
-            const reportData = collectReportData();
+            const activeSection = currentMode === 'opening' ? 'opening-section' : 'closing-section';
+            const items = document.querySelectorAll(`#${activeSection} .checklist-item`);
+            const headers = document.querySelectorAll(`#${activeSection} .checklist-section-title`);
 
-            let telegramText = `<b>📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ</b>\n\n`;
-            telegramText += `<b>🏪 Точка:</b> ${escapeHTML(storeName)}\n`;
-            telegramText += `<b>📅 Дата:</b> ${escapeHTML(date)}\n`;
-            telegramText += `<b>👤 Сотрудник:</b> ${escapeHTML(employeeName)}\n`;
-            telegramText += `<b>🕐 Режим:</b> ${currentMode === 'opening' ? 'Открытие смены' : 'Закрытие смены'}\n`;
-            telegramText += `<b>✅ Выполнено:</b> ${reportData.checkedCount}\n`;
-            telegramText += `<b>❌ Не выполнено:</b> ${reportData.uncheckedCount}\n`;
-            telegramText += `<b>📊 Всего:</b> ${reportData.total}\n\n`;
-            telegramText += `<b>📝 Детали:</b>\n`;
+            let checked = 0, unchecked = 0;
+            let sections = [];
+            let currentSec = null;
 
-            reportData.reportSections.forEach(section => {
-                telegramText += `\n<b>📌 ${escapeHTML(section.title)}:</b>\n`;
-                section.items.forEach(item => {
-                    let statusIcon = '⬜';
-                    let statusText = '';
-                    if (item.isChecked) {
-                        statusIcon = '✅';
-                    } else if (item.isUnchecked) {
-                        statusIcon = '❌';
-                        if (item.reason) {
-                            statusText = ` <i>(Причина: ${escapeHTML(item.reason)})</i>`;
-                        }
+            headers.forEach(h => {
+                if (currentSec) sections.push(currentSec);
+                currentSec = { title: h.textContent, items: [] };
+            });
+
+            let secIdx = -1;
+            items.forEach(item => {
+                const id = item.getAttribute('data-item-id');
+                const isChecked = item.classList.contains('checked');
+                const isUnchecked = item.classList.contains('unchecked');
+                const text = item.querySelector('.item-text').textContent;
+                const reason = itemReasons[id] || '';
+                if (isChecked) checked++;
+                if (isUnchecked) unchecked++;
+
+                for (let j = headers.length - 1; j >= 0; j--) {
+                    if (headers[j].compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING) {
+                        secIdx = j; break;
                     }
-                    telegramText += `${statusIcon} ${escapeHTML(item.text)}${statusText}\n`;
+                }
+                if (secIdx >= 0 && secIdx < sections.length) {
+                    sections[secIdx].items.push({ text, isChecked, isUnchecked, reason });
+                }
+            });
+            if (currentSec) sections.push(currentSec);
+
+            let msg = `<b>📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ</b>\n\n`;
+            msg += `<b>🏪 Точка:</b> ${esc(storeName)}\n`;
+            msg += `<b>📅 Дата:</b> ${esc(date)}\n`;
+            msg += `<b>👤 Сотрудник:</b> ${esc(employeeName)}\n`;
+            msg += `<b>🕐 Режим:</b> ${currentMode === 'opening' ? 'Открытие' : 'Закрытие'}\n`;
+            msg += `<b>✅ Выполнено:</b> ${checked} | <b>❌ Не выполнено:</b> ${unchecked} | <b>📊 Всего:</b> ${items.length}\n\n`;
+            msg += `<b>📝 Детали:</b>\n`;
+
+            sections.forEach(sec => {
+                msg += `\n<b>📌 ${esc(sec.title)}:</b>\n`;
+                sec.items.forEach(it => {
+                    let icon = '⬜';
+                    let extra = '';
+                    if (it.isChecked) icon = '✅';
+                    if (it.isUnchecked) {
+                        icon = '❌';
+                        if (it.reason) extra = ` — ${esc(it.reason)}`;
+                    }
+                    msg += `${icon} ${esc(it.text)}${extra}\n`;
                 });
             });
 
-            if (comments) {
-                telegramText += `\n<b>💬 Комментарий:</b> ${escapeHTML(comments)}\n`;
-            }
+            if (comments) msg += `\n<b>💬 Комментарий:</b> ${esc(comments)}\n`;
 
             setLoading(true);
             try {
-                await sendToTelegram(telegramText, photos);
-                showAlert('✅ Отправлено!',
-                    `Отчет успешно отправлен в Telegram!\n\n🏪 ${storeName}\n📅 ${date}\n👤 ${employeeName}\n✅ ${reportData.checkedCount} | ❌ ${reportData.uncheckedCount} | 📊 ${reportData.total}`);
-            } catch (error) {
-                showAlert('❌ Ошибка отправки', `Не удалось отправить отчет: ${error.message}`);
+                await sendToTelegram(msg, photos);
+                showAlert('✅ Отправлено!', `Отчет в канале!\n🏪 ${storeName}\n✅${checked} ❌${unchecked} 📊${items.length}`);
+            } catch (e) {
+                showAlert('❌ Ошибка', e.message);
             } finally {
                 setLoading(false);
             }
         }
 
-        // Инициализация
         renderChecklist(openingChecklist, 'opening-section');
         renderChecklist(closingChecklist, 'closing-section');
         updateCounter();
