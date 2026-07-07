@@ -39,6 +39,7 @@
             width: 100%; height: 46px; padding: 0 14px; background: rgba(242,242,247,0.8);
             border: 1px solid rgba(0,0,0,0.06); border-radius: var(--radius);
             font-size: 16px; font-family: inherit; color: var(--text); outline: none;
+            -webkit-appearance: none;
         }
         .input-group textarea { height: auto; min-height: 80px; padding: 12px 14px; resize: vertical; }
         .segmented-control { display: flex; background: rgba(0,0,0,0.04); border-radius: 11px; padding: 3px; margin-bottom: 14px; }
@@ -50,58 +51,73 @@
         .segmented-btn.active { background: white; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
         .section { display: none; }
         .section.active { display: block; }
-        .checklist-section-title { font-size: 14px; font-weight: 600; margin: 14px 0 8px; padding-left: 6px; border-left: 3px solid var(--blue); }
+        .checklist-section-title {
+            font-size: 14px; font-weight: 600; color: var(--text); margin: 16px 0 8px;
+            padding-left: 8px; border-left: 3px solid var(--blue); line-height: 1.2;
+        }
         .checklist-item {
             background: rgba(255,255,255,0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.6); border-radius: var(--radius); margin-bottom: 6px; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.6); border-radius: var(--radius);
+            margin-bottom: 8px; overflow: hidden; transition: all 0.2s ease;
         }
-        .checklist-item.checked { background: rgba(52,199,89,0.08); border-color: rgba(52,199,89,0.2); }
-        .checklist-item.unchecked { background: rgba(255,59,48,0.06); border-color: rgba(255,59,48,0.18); }
-        .checklist-item-main { display: flex; align-items: center; padding: 13px 14px; gap: 11px; }
+        .checklist-item.checked { background: rgba(52,199,89,0.1); border-color: rgba(52,199,89,0.3); }
+        .checklist-item.unchecked { background: rgba(255,59,48,0.08); border-color: rgba(255,59,48,0.25); }
+        .checklist-item-main { display: flex; align-items: flex-start; padding: 14px; gap: 10px; }
         .checkbox-custom {
-            width: 22px; height: 22px; border-radius: 7px; border: 2px solid #C7C7CC;
-            flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: white;
+            width: 24px; height: 24px; min-width: 24px; border-radius: 7px;
+            border: 2px solid #C7C7CC; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; background: white;
+            transition: all 0.2s ease; margin-top: 1px;
         }
         .checklist-item.checked .checkbox-custom { background: var(--green); border-color: var(--green); }
         .checklist-item.unchecked .checkbox-custom { background: var(--red); border-color: var(--red); }
-        .checkbox-custom svg { display: none; }
+        .checkbox-custom svg { display: none; width: 12px; height: 12px; }
         .checklist-item.checked .icon-check { display: block; }
         .checklist-item.unchecked .icon-cross { display: block; }
-        .item-text { flex: 1; font-size: 15px; line-height: 1.3; }
-        .item-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .item-text { flex: 1; font-size: 15px; line-height: 1.4; color: var(--text); word-break: break-word; }
+        .checklist-item.checked .item-text { color: #6d6d72; }
+        .item-actions { display: flex; gap: 6px; flex-shrink: 0; margin-left: 4px; }
         .action-btn {
-            width: 34px; height: 34px; border-radius: 9px; border: 1.5px solid rgba(0,0,0,0.08);
-            background: white; cursor: pointer; font-size: 15px; font-weight: 600;
+            width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid rgba(0,0,0,0.1);
+            background: white; cursor: pointer; font-size: 14px; font-weight: 600;
             font-family: inherit; display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s ease; line-height: 1;
         }
-        .btn-yes { border-color: rgba(52,199,89,0.3); color: var(--green); }
-        .btn-no { border-color: rgba(255,59,48,0.3); color: var(--red); }
-        .reason-input { display: none; padding: 0 14px 14px 47px; }
+        .action-btn:active { transform: scale(0.92); }
+        .btn-yes { border-color: rgba(52,199,89,0.4); color: var(--green); }
+        .btn-yes:hover { background: rgba(52,199,89,0.08); }
+        .btn-no { border-color: rgba(255,59,48,0.4); color: var(--red); }
+        .btn-no:hover { background: rgba(255,59,48,0.08); }
+        .reason-input { display: none; padding: 0 14px 14px 48px; }
         .reason-input.show { display: block; }
         .reason-input input {
-            width: 100%; height: 40px; padding: 0 12px; background: rgba(255,255,255,0.8);
-            border: 1px solid rgba(255,59,48,0.2); border-radius: 10px;
-            font-size: 14px; font-family: inherit; outline: none;
+            width: 100%; height: 38px; padding: 0 12px; background: rgba(255,255,255,0.85);
+            border: 1px solid rgba(255,59,48,0.25); border-radius: 10px;
+            font-size: 14px; font-family: inherit; color: var(--text); outline: none;
         }
+        .reason-input input:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(255,59,48,0.08); }
+        .reason-input input::placeholder { color: #C7C7CC; }
         .photo-card {
             background: var(--glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             border: 1.5px dashed rgba(0,0,0,0.1); border-radius: var(--radius-lg);
             padding: 22px; text-align: center; cursor: pointer; margin-bottom: 14px;
         }
+        .photo-card:active { transform: scale(0.98); }
         .photo-card .photo-icon { font-size: 30px; margin-bottom: 4px; }
         .photo-card .photo-label { font-size: 15px; font-weight: 500; color: var(--blue); }
         .photo-card .photo-hint { font-size: 12px; color: var(--gray); margin-top: 2px; }
         .photo-card input[type="file"] { display: none; }
         .photo-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .photo-preview img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; }
+        .photo-preview img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .submit-btn {
             width: 100%; height: 52px; background: var(--blue); color: white;
             border: none; border-radius: var(--radius); font-size: 17px; font-weight: 600;
             cursor: pointer; box-shadow: 0 4px 16px rgba(0,122,255,0.25);
             display: flex; align-items: center; justify-content: center; gap: 6px;
-            font-family: inherit; margin-top: 6px;
+            font-family: inherit; margin-top: 6px; transition: all 0.2s ease;
         }
-        .submit-btn.loading { opacity: 0.7; }
+        .submit-btn:active { transform: scale(0.97); }
+        .submit-btn.loading { opacity: 0.7; pointer-events: none; }
         .loader {
             display: none; width: 18px; height: 18px;
             border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
@@ -119,7 +135,7 @@
         }
         .ios-alert-overlay.show { display: flex; }
         .ios-alert {
-            background: rgba(255,255,255,0.95); border-radius: 20px;
+            background: rgba(255,255,255,0.96); border-radius: 20px;
             padding: 24px 20px; width: 85%; max-width: 350px; text-align: center;
             box-shadow: 0 20px 60px rgba(0,0,0,0.2);
         }
@@ -297,17 +313,17 @@
                     div.innerHTML = `
                         <div class="checklist-item-main">
                             <div class="checkbox-custom">
-                                <svg class="icon-check" width="13" height="10" viewBox="0 0 13 10"><path d="M1 5L4.5 8.5L12 1" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg>
-                                <svg class="icon-cross" width="11" height="11" viewBox="0 0 11 11"><path d="M1 1L10 10M10 1L1 10" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg>
+                                <svg class="icon-check" viewBox="0 0 13 10"><path d="M1 5L4.5 8.5L12 1" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                <svg class="icon-cross" viewBox="0 0 11 11"><path d="M1 1L10 10M10 1L1 10" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>
                             </div>
                             <span class="item-text">${item}</span>
                             <div class="item-actions">
-                                <button class="action-btn btn-yes" onclick="event.stopPropagation(); markItem('${itemId}','yes')">✓</button>
-                                <button class="action-btn btn-no" onclick="event.stopPropagation(); markItem('${itemId}','no')">✕</button>
+                                <button class="action-btn btn-yes" onclick="event.stopPropagation(); markItem('${itemId}','yes')" title="Выполнено">✓</button>
+                                <button class="action-btn btn-no" onclick="event.stopPropagation(); markItem('${itemId}','no')" title="Не выполнено">✕</button>
                             </div>
                         </div>
                         <div class="reason-input" id="reason-${itemId}">
-                            <input type="text" placeholder="Причина..." oninput="updateReason('${itemId}',this.value)">
+                            <input type="text" placeholder="Причина невыполнения..." oninput="updateReason('${itemId}',this.value)">
                         </div>`;
                     container.appendChild(div);
                 });
@@ -319,16 +335,22 @@
             const reason = document.getElementById(`reason-${itemId}`);
             item.classList.remove('checked', 'unchecked');
             if (status === 'yes') {
-                item.classList.add('checked'); reason.classList.remove('show'); delete itemReasons[itemId];
+                item.classList.add('checked');
+                reason.classList.remove('show');
+                reason.querySelector('input').value = '';
+                delete itemReasons[itemId];
             } else {
-                item.classList.add('unchecked'); reason.classList.add('show');
-                setTimeout(() => reason.querySelector('input').focus(), 100);
+                item.classList.add('unchecked');
+                reason.classList.add('show');
+                setTimeout(() => reason.querySelector('input').focus(), 150);
                 if (!itemReasons[itemId]) itemReasons[itemId] = '';
             }
             updateCounter();
         }
 
-        function updateReason(itemId, value) { itemReasons[itemId] = value.trim(); }
+        function updateReason(itemId, value) {
+            itemReasons[itemId] = value.trim();
+        }
 
         function updateCounter() {
             const s = currentMode === 'opening' ? 'opening-section' : 'closing-section';
@@ -400,66 +422,41 @@
             return { sections, checked, unchecked, total: items.length };
         }
 
-        // Генерация PDF
-        async function generatePDF(storeName, date, employeeName, comments, data) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-            let y = 15;
-            doc.setFontSize(18); doc.setTextColor(0, 122, 255);
-            doc.text('ОТЧЕТ ПО ЧЕК-ЛИСТУ', 105, y, { align: 'center' }); y += 8;
-            doc.line(15, y, 195, y); y += 8;
-            doc.setFontSize(12); doc.setTextColor(28, 28, 30);
-            doc.text(`Точка: ${storeName}`, 15, y); y += 7;
-            doc.text(`Дата: ${date}`, 15, y); y += 7;
-            doc.text(`Сотрудник: ${employeeName}`, 15, y); y += 7;
-            doc.text(`Режим: ${currentMode==='opening'?'Открытие':'Закрытие'}`, 15, y); y += 7;
-            doc.text(`Выполнено: ${data.checked} | Не выполнено: ${data.unchecked} | Всего: ${data.total}`, 15, y); y += 10;
+        function buildFullReport(storeName, date, employeeName, comments, data) {
+            const mode = currentMode === 'opening' ? 'Открытие смены' : 'Закрытие смены';
+            let msg = `📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ\n\n`;
+            msg += `🏪 Точка: ${storeName}\n`;
+            msg += `📅 Дата: ${date}\n`;
+            msg += `👤 Сотрудник: ${employeeName}\n`;
+            msg += `🕐 Режим: ${mode}\n\n`;
+            msg += `📊 СТАТИСТИКА:\n`;
+            msg += `✅ Выполнено: ${data.checked}\n`;
+            msg += `❌ Не выполнено: ${data.unchecked}\n`;
+            msg += `📋 Всего пунктов: ${data.total}\n\n`;
+            msg += `📝 ДЕТАЛИ:\n`;
 
             data.sections.forEach(sec => {
-                if (y > 260) { doc.addPage(); y = 15; }
-                doc.setFontSize(13); doc.setTextColor(0, 122, 255);
-                doc.text(sec.title, 15, y); y += 7;
+                msg += `\n📌 ${sec.title}:\n`;
                 sec.items.forEach(it => {
-                    if (y > 270) { doc.addPage(); y = 15; }
-                    let icon = it.isChecked ? '[V]' : (it.isUnchecked ? '[X]' : '[ ]');
-                    let text = `${icon} ${it.text}`;
-                    if (it.isUnchecked && it.reason) text += ` - ${it.reason}`;
-                    doc.setFontSize(10);
-                    doc.setTextColor(it.isChecked ? 52 : (it.isUnchecked ? 255 : 142), it.isChecked ? 199 : (it.isUnchecked ? 59 : 142), it.isChecked ? 89 : (it.isUnchecked ? 48 : 147));
-                    doc.splitTextToSize(text, 175).forEach(line => {
-                        if (y > 275) { doc.addPage(); y = 15; }
-                        doc.text(line, 18, y); y += 5;
-                    });
-                    y += 1;
+                    let icon = '⬜';
+                    if (it.isChecked) icon = '✅';
+                    if (it.isUnchecked) icon = '❌';
+                    msg += `${icon} ${it.text}`;
+                    if (it.isUnchecked && it.reason) msg += ` — ${it.reason}`;
+                    msg += `\n`;
                 });
-                y += 4;
             });
 
-            if (comments) {
-                if (y > 250) { doc.addPage(); y = 15; }
-                y += 4; doc.setFontSize(12); doc.setTextColor(28, 28, 30);
-                doc.text('Комментарий:', 15, y); y += 7;
-                doc.setFontSize(10); doc.setTextColor(99, 99, 102);
-                doc.text(comments, 18, y, { maxWidth: 175 });
-            }
-            doc.setFontSize(8); doc.setTextColor(142, 142, 147);
-            doc.text('EGORKIN DEV', 105, 288, { align: 'center' });
-            return doc.output('blob');
+            if (comments) msg += `\n💬 Комментарий: ${comments}\n`;
+            msg += `\nEGORKIN DEV`;
+            return msg;
         }
 
-        // Отправка через сервер Netlify
-        async function sendReport(header, pdfBlob, photos) {
-            const formData = new FormData();
-            formData.append('message', header);
-            formData.append('pdf', pdfBlob, 'report.pdf');
-            
-            for (let i = 0; i < photos.length; i++) {
-                formData.append('photos', photos[i]);
-            }
-
+        async function sendReport(message) {
             const response = await fetch('/api/send-report', {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
             });
 
             if (!response.ok) {
@@ -477,36 +474,23 @@
             const comments = document.getElementById('comments').value.trim();
 
             if (!storeName || !date || !employeeName) {
-                showAlert('⚠️ Заполните все поля', '');
+                showAlert('⚠️ Заполните все поля', 'Название точки, дата и фамилия обязательны.');
                 return;
             }
 
             const data = collectReportData();
-            const mode = currentMode === 'opening' ? 'Открытие' : 'Закрытие';
-            
-            let header = `📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ\n\n🏪 ${storeName}\n📅 ${date}\n👤 ${employeeName}\n🕐 ${mode}\n✅ ${data.checked} | ❌ ${data.unchecked} | 📊 ${data.total}`;
-            if (comments) header += `\n💬 ${comments}`;
-            header += `\n\nEGORKIN DEV`;
+            const report = buildFullReport(storeName, date, employeeName, comments, data);
 
             setLoading(true);
             try {
-                const pdfBlob = await generatePDF(storeName, date, employeeName, comments, data);
-                await sendReport(header, pdfBlob, photos);
+                await sendReport(report);
                 setLoading(false);
-                showAlert('✅ Отправлено!', `PDF + фото в беседу!\n🏪 ${storeName}\n✅${data.checked} ❌${data.unchecked} 📊${data.total}`);
+                showAlert('✅ Отправлено!', `Отчет в беседу!\n🏪 ${storeName}\n✅${data.checked} ❌${data.unchecked} 📊${data.total}`);
             } catch (e) {
-                console.error(e);
-                // Fallback — текст через Image()
-                let fullText = header + '\n\n📝 ДЕТАЛИ:\n';
-                data.sections.forEach(sec => {
-                    fullText += `\n📌 ${sec.title}:\n`;
-                    sec.items.forEach(it => {
-                        let icon = '⬜'; if (it.isChecked) icon = '✅'; if (it.isUnchecked) icon = '❌';
-                        fullText += `${icon} ${it.text}${it.isUnchecked&&it.reason?' — '+it.reason:''}\n`;
-                    });
-                });
+                console.warn('Сервер недоступен, отправка напрямую...');
+                // Fallback — напрямую
                 const msgs = [];
-                let r = fullText;
+                let r = report;
                 while (r.length > 0) { msgs.push(r.substring(0, 4000)); r = r.substring(4000); }
                 msgs.forEach((msg, i) => {
                     setTimeout(() => {
@@ -514,7 +498,7 @@
                     }, i * 500);
                 });
                 setLoading(false);
-                showAlert('⚠️ Отправлен текст', 'Сервер недоступен.\nТекст отправлен напрямую.');
+                showAlert('✅ Отправлено!', `Отчет в беседу!\n🏪 ${storeName}\n✅${data.checked} ❌${data.unchecked} 📊${data.total}`);
             }
         }
 
