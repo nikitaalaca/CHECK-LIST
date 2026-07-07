@@ -16,7 +16,6 @@
             --text-secondary: #636366;
             --radius: 14px;
             --radius-lg: 18px;
-            --padding: 14px 16px;
             --transition: 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
@@ -96,7 +95,6 @@
             margin-top: 2px;
         }
 
-        /* Карточка */
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(25px) saturate(180%);
@@ -117,7 +115,6 @@
             margin-bottom: 14px;
         }
 
-        /* ЕДИНЫЙ СТИЛЬ ДЛЯ ВСЕХ INPUT */
         .input-group {
             margin-bottom: 12px;
         }
@@ -156,7 +153,6 @@
             line-height: 1.4;
             resize: vertical;
         }
-        /* Поле даты — такой же размер как остальные */
         .input-group input[type="date"] {
             height: 46px;
             padding: 0 14px;
@@ -172,7 +168,6 @@
             box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
         }
 
-        /* Сегментированный контрол */
         .segmented-control {
             display: flex;
             background: rgba(0,0,0,0.04);
@@ -199,7 +194,6 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
         }
 
-        /* Секции */
         .section {
             display: none;
             animation: fadeSlideIn 0.3s ease;
@@ -212,7 +206,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Заголовок секции */
         .checklist-section-title {
             font-size: 14px;
             font-weight: 600;
@@ -232,7 +225,6 @@
             flex-shrink: 0;
         }
 
-        /* Элемент чек-листа */
         .checklist-item {
             background: rgba(255,255,255,0.55);
             backdrop-filter: blur(10px);
@@ -257,10 +249,8 @@
             align-items: center;
             padding: 13px 14px;
             gap: 11px;
-            cursor: default;
         }
 
-        /* Чекбокс */
         .checkbox-custom {
             width: 22px;
             height: 22px;
@@ -288,14 +278,12 @@
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
-        .checkbox-custom .icon-check {
+        .checkbox-custom .icon-check,
+        .checkbox-custom .icon-cross {
             display: none;
         }
         .checklist-item.checked .checkbox-custom .icon-check {
             display: block;
-        }
-        .checkbox-custom .icon-cross {
-            display: none;
         }
         .checklist-item.unchecked .checkbox-custom .icon-cross {
             display: block;
@@ -311,7 +299,6 @@
             color: #8E8E93;
         }
 
-        /* Кнопки действий */
         .item-actions {
             display: flex;
             gap: 8px;
@@ -340,18 +327,11 @@
             border-color: rgba(52,199,89,0.3);
             color: var(--green);
         }
-        .btn-yes:hover {
-            background: rgba(52,199,89,0.08);
-        }
         .btn-no {
             border-color: rgba(255,59,48,0.3);
             color: var(--red);
         }
-        .btn-no:hover {
-            background: rgba(255,59,48,0.08);
-        }
 
-        /* Причина */
         .reason-input {
             display: none;
             padding: 0 14px 14px 47px;
@@ -383,7 +363,6 @@
             font-size: 13px;
         }
 
-        /* Фото */
         .photo-card {
             background: var(--glass-bg);
             backdrop-filter: blur(25px) saturate(180%);
@@ -430,7 +409,6 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        /* Кнопка отправки */
         .submit-btn {
             width: 100%;
             height: 52px;
@@ -474,7 +452,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Счетчик */
         .counter {
             text-align: center;
             margin-top: 10px;
@@ -496,7 +473,6 @@
             50% { opacity: 0.4; }
         }
 
-        /* Footer */
         .footer {
             text-align: center;
             padding: 20px 0 8px;
@@ -511,7 +487,6 @@
             border-radius: 20px;
         }
 
-        /* Алерт */
         .ios-alert-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -643,12 +618,10 @@
     </div>
 
     <script>
-        // ============ НАСТРОЙКИ ============
+        // ============ НАСТРОЙКИ TELEGRAM ============
         const BOT_TOKEN = '8920306780:AAHSc7YbrF7nqiT9aSD59_31Fq-j8MKy4n0';
-        const CHAT_ID = '@-1001467435264'; // Формат для канала: @username или -100id
-        // Если chat_id числовой (как твой 1467435264), для канала нужно добавить -100 впереди: -1001467435264
-        const ACTUAL_CHAT_ID = '-1001467435264'; // <- ИСПРАВЬ ЕСЛИ НУЖНО
-        // =================================
+        const CHAT_ID = '-1004308183842'; // Канал "Check" (@kpipulse)
+        // ===========================================
 
         document.getElementById('date').valueAsDate = new Date();
 
@@ -873,28 +846,47 @@
 
         async function sendToTelegram(text, photoFiles) {
             const textUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            
+            console.log('Отправка в канал:', CHAT_ID);
+            
             const res = await fetch(textUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    chat_id: ACTUAL_CHAT_ID,
+                    chat_id: CHAT_ID,
                     text: text,
                     parse_mode: 'HTML'
                 })
             });
+
+            const data = await res.json();
+            
             if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.description || 'Ошибка отправки');
+                console.error('Ошибка Telegram:', data);
+                throw new Error(data.description || 'Ошибка отправки');
             }
+
+            console.log('Текст отправлен в канал Check ✅');
 
             if (photoFiles && photoFiles.length > 0) {
                 for (const photo of photoFiles) {
                     const fd = new FormData();
-                    fd.append('chat_id', ACTUAL_CHAT_ID);
+                    fd.append('chat_id', CHAT_ID);
                     fd.append('photo', photo);
-                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+                    
+                    const photoRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                        method: 'POST',
+                        body: fd
+                    });
+                    
+                    if (!photoRes.ok) {
+                        const errData = await photoRes.json();
+                        console.warn('Ошибка отправки фото:', errData.description);
+                    }
                 }
             }
+
+            return data;
         }
 
         function esc(s) {
@@ -962,7 +954,7 @@
                     if (it.isChecked) icon = '✅';
                     if (it.isUnchecked) {
                         icon = '❌';
-                        if (it.reason) extra = ` — ${esc(it.reason)}`;
+                        if (it.reason) extra = ` — <i>${esc(it.reason)}</i>`;
                     }
                     msg += `${icon} ${esc(it.text)}${extra}\n`;
                 });
@@ -973,9 +965,9 @@
             setLoading(true);
             try {
                 await sendToTelegram(msg, photos);
-                showAlert('✅ Отправлено!', `Отчет в канале!\n🏪 ${storeName}\n✅${checked} ❌${unchecked} 📊${items.length}`);
+                showAlert('✅ Отправлено!', `Отчет отправлен в канал Check!\n\n🏪 ${storeName}\n✅${checked} ❌${unchecked} 📊${items.length}`);
             } catch (e) {
-                showAlert('❌ Ошибка', e.message);
+                showAlert('❌ Ошибка', `${e.message}\n\nУбедитесь, что бот — администратор канала @kpipulse`);
             } finally {
                 setLoading(false);
             }
