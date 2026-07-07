@@ -10,9 +10,9 @@
             --glass-border: rgba(255, 255, 255, 0.5);
             --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
             --blue: #007AFF;
-            --blue-light: #409CFF;
             --green: #34C759;
             --red: #FF3B30;
+            --orange: #FF9500;
             --gray: #8E8E93;
             --gray-light: #F2F2F7;
             --text: #1C1C1E;
@@ -42,7 +42,6 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Фоновые размытые круги как в iOS */
         .bg-decoration {
             position: fixed;
             border-radius: 50%;
@@ -82,7 +81,6 @@
             z-index: 1;
         }
 
-        /* Заголовок */
         .header {
             text-align: center;
             padding: 24px 0 8px;
@@ -111,7 +109,6 @@
             margin-top: 2px;
         }
 
-        /* Карточка */
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(25px) saturate(180%);
@@ -123,9 +120,6 @@
             box-shadow: var(--glass-shadow);
             transition: transform var(--transition), box-shadow var(--transition);
         }
-        .card:active {
-            transform: scale(0.995);
-        }
 
         .card-title {
             font-size: 13px;
@@ -136,7 +130,6 @@
             margin-bottom: 12px;
         }
 
-        /* Поля ввода в стиле iOS */
         .input-group {
             margin-bottom: 10px;
         }
@@ -182,7 +175,6 @@
             min-height: 70px;
         }
 
-        /* Переключатель режима - сегментированный контрол */
         .segmented-control {
             display: flex;
             background: rgba(0,0,0,0.05);
@@ -210,7 +202,6 @@
             box-shadow: 0 1px 4px rgba(0,0,0,0.1), 0 0 0 0.5px rgba(0,0,0,0.04);
         }
 
-        /* Секция */
         .section {
             display: none;
             animation: fadeSlideIn 0.35s ease;
@@ -223,7 +214,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Заголовок секции чек-листа */
         .checklist-section-title {
             font-size: 15px;
             font-weight: 600;
@@ -240,35 +230,43 @@
             height: 18px;
             background: var(--blue);
             border-radius: 2px;
+            flex-shrink: 0;
         }
 
         /* Элемент чек-листа */
         .checklist-item {
-            display: flex;
-            align-items: center;
-            padding: 13px 14px;
-            margin-bottom: 6px;
             background: rgba(255,255,255,0.55);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.6);
             border-radius: var(--radius-sm);
-            cursor: pointer;
+            margin-bottom: 6px;
             transition: all var(--transition);
-            gap: 12px;
-            position: relative;
             overflow: hidden;
         }
-        .checklist-item:active {
+
+        .checklist-item-main {
+            display: flex;
+            align-items: center;
+            padding: 13px 14px;
+            cursor: pointer;
+            gap: 12px;
+            transition: all var(--transition);
+        }
+        .checklist-item-main:active {
             transform: scale(0.985);
             background: rgba(255,255,255,0.75);
         }
+
         .checklist-item.checked {
             background: rgba(52,199,89,0.1);
             border-color: rgba(52,199,89,0.25);
         }
+        .checklist-item.unchecked {
+            background: rgba(255,59,48,0.08);
+            border-color: rgba(255,59,48,0.2);
+        }
 
-        /* Кастомный чекбокс */
         .checkbox-custom {
             width: 22px;
             height: 22px;
@@ -286,18 +284,33 @@
             border-color: var(--green);
             animation: popIn 0.3s ease;
         }
+        .checklist-item.unchecked .checkbox-custom {
+            background: var(--red);
+            border-color: var(--red);
+            animation: popIn 0.3s ease;
+        }
         @keyframes popIn {
             0% { transform: scale(0.7); }
             60% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
-        .checkbox-custom svg {
+
+        .checkbox-custom svg.check-icon {
             opacity: 0;
             transition: opacity 0.15s ease;
         }
-        .checklist-item.checked .checkbox-custom svg {
+        .checklist-item.checked .checkbox-custom svg.check-icon {
             opacity: 1;
         }
+
+        .checkbox-custom svg.cross-icon {
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+        .checklist-item.unchecked .checkbox-custom svg.cross-icon {
+            opacity: 1;
+        }
+
         .checklist-item input[type="checkbox"] {
             display: none;
         }
@@ -312,7 +325,92 @@
             color: #8E8E93;
         }
 
-        /* Фото зона */
+        /* Кнопки действий */
+        .item-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1.5px solid rgba(0,0,0,0.1);
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all var(--transition);
+            flex-shrink: 0;
+        }
+        .action-btn:active {
+            transform: scale(0.9);
+        }
+        .action-btn.btn-yes {
+            border-color: rgba(52,199,89,0.3);
+            color: var(--green);
+        }
+        .action-btn.btn-yes:hover {
+            background: rgba(52,199,89,0.1);
+        }
+        .action-btn.btn-no {
+            border-color: rgba(255,59,48,0.3);
+            color: var(--red);
+        }
+        .action-btn.btn-no:hover {
+            background: rgba(255,59,48,0.1);
+        }
+
+        /* Пояснение причины */
+        .reason-input {
+            display: none;
+            padding: 0 14px 13px 48px;
+        }
+        .reason-input.show {
+            display: block;
+            animation: fadeSlideIn 0.3s ease;
+        }
+        .reason-input input {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(242, 242, 247, 0.8);
+            border: 1px solid rgba(255,59,48,0.2);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text);
+            outline: none;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        .reason-input input:focus {
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px rgba(255,59,48,0.1);
+        }
+        .reason-input input::placeholder {
+            color: #C7C7CC;
+        }
+
+        /* Статус-метка */
+        .status-badge {
+            display: none;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+            margin-left: 48px;
+            margin-bottom: 8px;
+        }
+        .status-badge.show {
+            display: inline-block;
+        }
+        .status-badge.badge-no {
+            background: rgba(255,59,48,0.1);
+            color: var(--red);
+        }
+
         .photo-card {
             background: var(--glass-bg);
             backdrop-filter: blur(25px) saturate(180%);
@@ -364,7 +462,6 @@
             animation: popIn 0.3s ease;
         }
 
-        /* Кнопка отправки */
         .submit-btn {
             width: 100%;
             padding: 15px;
@@ -379,6 +476,8 @@
             transition: all var(--transition);
             box-shadow: 0 4px 16px rgba(0,122,255,0.3);
             letter-spacing: -0.2px;
+            position: relative;
+            overflow: hidden;
         }
         .submit-btn:active {
             transform: scale(0.97);
@@ -389,8 +488,30 @@
             box-shadow: none;
             cursor: not-allowed;
         }
+        .submit-btn.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        .submit-btn .loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .submit-btn.loading .loader {
+            display: block;
+        }
+        @keyframes spin {
+            to { transform: translateY(-50%) rotate(360deg); }
+        }
 
-        /* Счетчик */
         .counter {
             text-align: center;
             margin-top: 12px;
@@ -413,7 +534,21 @@
             50% { opacity: 0.4; }
         }
 
-        /* Алерт в стиле iOS */
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px 0 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray);
+            letter-spacing: 1px;
+        }
+        .footer span {
+            background: rgba(0,0,0,0.04);
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
         .ios-alert-overlay {
             position: fixed;
             top: 0;
@@ -456,6 +591,8 @@
             color: var(--text-secondary);
             margin-bottom: 18px;
             line-height: 1.4;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
         .ios-alert button {
             width: 100%;
@@ -480,7 +617,6 @@
     <div class="bg-decoration"></div>
 
     <div class="container">
-        <!-- Заголовок -->
         <div class="header">
             <div class="header-icon">📋</div>
             <h1>Чек-лист смены</h1>
@@ -534,14 +670,20 @@
         </div>
 
         <!-- Кнопка -->
-        <button class="submit-btn" onclick="generateReport()">
-            📤 Отправить отчет
+        <button class="submit-btn" id="submitBtn" onclick="generateReport()">
+            <span id="submitText">📤 Отправить отчет</span>
+            <div class="loader"></div>
         </button>
 
         <!-- Счетчик -->
         <div class="counter" id="counter">
             <span class="progress-ring"></span>
             <span id="counterText">Выполнено: 0 из 0</span>
+        </div>
+
+        <!-- Подпись -->
+        <div class="footer">
+            <span>EGORKIN DEV</span>
         </div>
     </div>
 
@@ -555,10 +697,16 @@
     </div>
 
     <script>
+        const BOT_TOKEN = '8920306780:AAHSc7YbrF7nqiT9aSD59_31Fq-j8MKy4n0';
+        const CHAT_ID = '1467435264';
+
         document.getElementById('date').valueAsDate = new Date();
 
         let currentMode = 'opening';
         let photos = [];
+
+        // Хранилище причин "не выполнено"
+        let itemReasons = {};
 
         const openingChecklist = {
             "Экстерьер": [
@@ -662,42 +810,73 @@
                 container.appendChild(sectionTitle);
 
                 items.forEach((item, index) => {
+                    const itemId = `${containerId}-${section}-${index}`;
+
                     const div = document.createElement('div');
                     div.className = 'checklist-item';
-                    div.onclick = function(e) {
-                        if (e.target.tagName === 'INPUT') return;
-                        const cb = this.querySelector('input[type="checkbox"]');
-                        cb.checked = !cb.checked;
-                        toggleItem(this, cb.checked);
-                    };
+                    div.setAttribute('data-item-id', itemId);
                     div.innerHTML = `
-                        <input type="checkbox" id="${containerId}-${section}-${index}" onchange="toggleItem(this.parentElement, this.checked); event.stopPropagation();">
-                        <div class="checkbox-custom">
-                            <svg width="14" height="11" viewBox="0 0 14 11" fill="none">
-                                <path d="M1 5.5L5 9.5L13 1.5" stroke="white" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
+                        <div class="checklist-item-main" onclick="event.stopPropagation();">
+                            <div class="checkbox-custom">
+                                <svg class="check-icon" width="14" height="11" viewBox="0 0 14 11" fill="none">
+                                    <path d="M1 5.5L5 9.5L13 1.5" stroke="white" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <svg class="cross-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                    <path d="M1 1L11 11M11 1L1 11" stroke="white" stroke-width="2.3" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <span class="item-text">${item}</span>
+                            <div class="item-actions">
+                                <button class="action-btn btn-yes" onclick="event.stopPropagation(); markItem('${itemId}', 'yes')" title="Выполнено">✓</button>
+                                <button class="action-btn btn-no" onclick="event.stopPropagation(); markItem('${itemId}', 'no')" title="Не выполнено">✕</button>
+                            </div>
                         </div>
-                        <span class="item-text">${item}</span>
+                        <div class="reason-input" id="reason-${itemId}">
+                            <input type="text" placeholder="Укажите причину невыполнения..." oninput="updateReason('${itemId}', this.value)">
+                        </div>
                     `;
                     container.appendChild(div);
                 });
             }
         }
 
-        function toggleItem(element, isChecked) {
-            if (isChecked) {
-                element.classList.add('checked');
-            } else {
-                element.classList.remove('checked');
+        function markItem(itemId, status) {
+            const item = document.querySelector(`[data-item-id="${itemId}"]`);
+            const reasonInput = document.getElementById(`reason-${itemId}`);
+
+            // Сбрасываем классы
+            item.classList.remove('checked', 'unchecked');
+
+            if (status === 'yes') {
+                item.classList.add('checked');
+                reasonInput.classList.remove('show');
+                delete itemReasons[itemId];
+            } else if (status === 'no') {
+                item.classList.add('unchecked');
+                reasonInput.classList.add('show');
+                // Фокусируем поле ввода
+                setTimeout(() => {
+                    reasonInput.querySelector('input').focus();
+                }, 100);
+                if (!itemReasons[itemId]) {
+                    itemReasons[itemId] = '';
+                }
             }
+
             updateCounter();
+        }
+
+        function updateReason(itemId, value) {
+            itemReasons[itemId] = value.trim();
         }
 
         function updateCounter() {
             const activeSection = currentMode === 'opening' ? 'opening-section' : 'closing-section';
-            const allCheckboxes = document.querySelectorAll(`#${activeSection} input[type="checkbox"]`);
-            const checkedCount = document.querySelectorAll(`#${activeSection} input[type="checkbox"]:checked`).length;
-            document.getElementById('counterText').textContent = `Выполнено: ${checkedCount} из ${allCheckboxes.length}`;
+            const allItems = document.querySelectorAll(`#${activeSection} .checklist-item`);
+            const checkedItems = document.querySelectorAll(`#${activeSection} .checklist-item.checked`);
+            const uncheckedItems = document.querySelectorAll(`#${activeSection} .checklist-item.unchecked`);
+            document.getElementById('counterText').textContent =
+                `✅ ${checkedItems.length} | ❌ ${uncheckedItems.length} | Всего: ${allItems.length}`;
         }
 
         function switchMode(mode) {
@@ -741,6 +920,132 @@
             document.getElementById('alertOverlay').classList.remove('show');
         }
 
+        function setLoading(isLoading) {
+            const btn = document.getElementById('submitBtn');
+            const text = document.getElementById('submitText');
+            if (isLoading) {
+                btn.classList.add('loading');
+                text.textContent = 'Отправка...';
+            } else {
+                btn.classList.remove('loading');
+                text.textContent = '📤 Отправить отчет';
+            }
+        }
+
+        async function sendToTelegram(text, photoFiles) {
+            const textUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            const textResponse = await fetch(textUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: text,
+                    parse_mode: 'HTML'
+                })
+            });
+
+            if (!textResponse.ok) {
+                const err = await textResponse.json();
+                throw new Error(err.description || 'Ошибка отправки текста');
+            }
+
+            if (photoFiles && photoFiles.length > 0) {
+                for (const photo of photoFiles) {
+                    const formData = new FormData();
+                    formData.append('chat_id', CHAT_ID);
+                    formData.append('photo', photo);
+
+                    const photoUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`;
+                    const photoResponse = await fetch(photoUrl, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!photoResponse.ok) {
+                        console.warn('Не удалось отправить фото:', await photoResponse.json());
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        function escapeHTML(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function collectReportData() {
+            const activeSection = currentMode === 'opening' ? 'opening-section' : 'closing-section';
+            const items = document.querySelectorAll(`#${activeSection} .checklist-item`);
+            const sectionHeaders = document.querySelectorAll(`#${activeSection} .checklist-section-title`);
+
+            let checkedCount = 0;
+            let uncheckedCount = 0;
+
+            // Определяем порядок секций и их элементов
+            let reportSections = [];
+            let currentSectionData = null;
+
+            sectionHeaders.forEach(header => {
+                if (currentSectionData) {
+                    reportSections.push(currentSectionData);
+                }
+                currentSectionData = {
+                    title: header.textContent,
+                    items: []
+                };
+            });
+
+            // Распределяем элементы по секциям
+            let sectionIndex = -1;
+            items.forEach(item => {
+                const itemId = item.getAttribute('data-item-id');
+                const isChecked = item.classList.contains('checked');
+                const isUnchecked = item.classList.contains('unchecked');
+                const text = item.querySelector('.item-text').textContent;
+                const reason = itemReasons[itemId] || '';
+
+                if (isChecked) checkedCount++;
+                if (isUnchecked) uncheckedCount++;
+
+                // Определяем к какой секции относится элемент
+                // Ищем ближайший заголовок перед этим элементом
+                for (let j = sectionHeaders.length - 1; j >= 0; j--) {
+                    if (sectionHeaders[j].compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING) {
+                        sectionIndex = j;
+                        break;
+                    }
+                }
+
+                if (sectionIndex >= 0 && sectionIndex < reportSections.length) {
+                    reportSections[sectionIndex].items.push({
+                        text,
+                        isChecked,
+                        isUnchecked,
+                        reason
+                    });
+                }
+            });
+
+            if (currentSectionData) {
+                reportSections.push(currentSectionData);
+            }
+
+            return {
+                reportSections,
+                checkedCount,
+                uncheckedCount,
+                total: items.length
+            };
+        }
+
         async function generateReport() {
             const storeName = document.getElementById('storeName').value.trim();
             const date = document.getElementById('date').value;
@@ -752,57 +1057,49 @@
                 return;
             }
 
-            const activeSection = currentMode === 'opening' ? 'opening-section' : 'closing-section';
-            const allCheckboxes = document.querySelectorAll(`#${activeSection} input[type="checkbox"]`);
-            const checkedCount = document.querySelectorAll(`#${activeSection} input[type="checkbox"]:checked`).length;
+            const reportData = collectReportData();
 
-            let reportText = `📋 *ОТЧЕТ ПО ЧЕК-ЛИСТУ*\n\n`;
-            reportText += `🏪 *Точка:* ${storeName}\n`;
-            reportText += `📅 *Дата:* ${date}\n`;
-            reportText += `👤 *Сотрудник:* ${employeeName}\n`;
-            reportText += `🕐 *Режим:* ${currentMode === 'opening' ? 'Открытие смены' : 'Закрытие смены'}\n`;
-            reportText += `✅ *Выполнено:* ${checkedCount} из ${allCheckboxes.length}\n\n`;
-            reportText += `📝 *Детали:*\n`;
+            let telegramText = `<b>📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ</b>\n\n`;
+            telegramText += `<b>🏪 Точка:</b> ${escapeHTML(storeName)}\n`;
+            telegramText += `<b>📅 Дата:</b> ${escapeHTML(date)}\n`;
+            telegramText += `<b>👤 Сотрудник:</b> ${escapeHTML(employeeName)}\n`;
+            telegramText += `<b>🕐 Режим:</b> ${currentMode === 'opening' ? 'Открытие смены' : 'Закрытие смены'}\n`;
+            telegramText += `<b>✅ Выполнено:</b> ${reportData.checkedCount}\n`;
+            telegramText += `<b>❌ Не выполнено:</b> ${reportData.uncheckedCount}\n`;
+            telegramText += `<b>📊 Всего:</b> ${reportData.total}\n\n`;
+            telegramText += `<b>📝 Детали:</b>\n`;
 
-            let currentSection = '';
-            const sectionHeaders = document.querySelectorAll(`#${activeSection} .checklist-section-title`);
-            const items = document.querySelectorAll(`#${activeSection} .checklist-item`);
-
-            items.forEach((item, i) => {
-                // Находим ближайший заголовок секции перед этим элементом
-                let sectionName = '';
-                for (let j = sectionHeaders.length - 1; j >= 0; j--) {
-                    if (sectionHeaders[j].compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING) {
-                        sectionName = sectionHeaders[j].textContent;
-                        break;
+            reportData.reportSections.forEach(section => {
+                telegramText += `\n<b>📌 ${escapeHTML(section.title)}:</b>\n`;
+                section.items.forEach(item => {
+                    let statusIcon = '⬜';
+                    let statusText = '';
+                    if (item.isChecked) {
+                        statusIcon = '✅';
+                    } else if (item.isUnchecked) {
+                        statusIcon = '❌';
+                        if (item.reason) {
+                            statusText = ` <i>(Причина: ${escapeHTML(item.reason)})</i>`;
+                        }
                     }
-                }
-                
-                if (sectionName !== currentSection) {
-                    currentSection = sectionName;
-                    reportText += `\n📌 *${currentSection}:*\n`;
-                }
-
-                const isChecked = item.classList.contains('checked');
-                const text = item.querySelector('.item-text').textContent;
-                reportText += `${isChecked ? '✅' : '❌'} ${text}\n`;
+                    telegramText += `${statusIcon} ${escapeHTML(item.text)}${statusText}\n`;
+                });
             });
 
             if (comments) {
-                reportText += `\n💬 *Комментарий:* ${comments}\n`;
+                telegramText += `\n<b>💬 Комментарий:</b> ${escapeHTML(comments)}\n`;
             }
 
-            // Скачиваем файл
-            const blob = new Blob([reportText.replace(/\*/g, '')], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            const safeName = storeName.replace(/[^a-zA-Zа-яА-Я0-9]/g, '_');
-            a.download = `Отчет_${safeName}_${date}_${employeeName}.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
-
-            showAlert('✅ Отчет сформирован', `Файл сохранен.\n\n${reportText.replace(/\*/g, '')}`);
+            setLoading(true);
+            try {
+                await sendToTelegram(telegramText, photos);
+                showAlert('✅ Отправлено!',
+                    `Отчет успешно отправлен в Telegram!\n\n🏪 ${storeName}\n📅 ${date}\n👤 ${employeeName}\n✅ ${reportData.checkedCount} | ❌ ${reportData.uncheckedCount} | 📊 ${reportData.total}`);
+            } catch (error) {
+                showAlert('❌ Ошибка отправки', `Не удалось отправить отчет: ${error.message}`);
+            } finally {
+                setLoading(false);
+            }
         }
 
         // Инициализация
