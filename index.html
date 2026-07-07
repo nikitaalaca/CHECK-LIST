@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Чек-лист смены</title>
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.72);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            --blue: #007AFF;
+            --blue-light: #409CFF;
+            --green: #34C759;
+            --red: #FF3B30;
+            --gray: #8E8E93;
+            --gray-light: #F2F2F7;
+            --text: #1C1C1E;
+            --text-secondary: #636366;
+            --radius-sm: 12px;
+            --radius: 16px;
+            --radius-lg: 20px;
+            --transition: 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(180deg, #E8ECF1 0%, #F2F2F7 30%, #E8ECF1 100%);
+            min-height: 100vh;
+            padding: 0;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Фоновые размытые круги как в iOS */
+        .bg-decoration {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-decoration:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(0,122,255,0.25) 0%, transparent 70%);
+            top: -80px;
+            right: -60px;
+        }
+        .bg-decoration:nth-child(2) {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(52,199,89,0.2) 0%, transparent 70%);
+            bottom: 10%;
+            left: -70px;
+        }
+        .bg-decoration:nth-child(3) {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,149,0,0.15) 0%, transparent 70%);
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 12px 16px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Заголовок */
+        .header {
+            text-align: center;
+            padding: 24px 0 8px;
+            position: relative;
+        }
+        .header-icon {
+            font-size: 40px;
+            margin-bottom: 6px;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            margin: 0;
+        }
+        .header .subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        /* Карточка */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 18px 16px;
+            margin-bottom: 14px;
+            box-shadow: var(--glass-shadow);
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+        .card:active {
+            transform: scale(0.995);
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray);
+            margin-bottom: 12px;
+        }
+
+        /* Поля ввода в стиле iOS */
+        .input-group {
+            margin-bottom: 10px;
+        }
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            padding-left: 2px;
+        }
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 13px 14px;
+            background: rgba(242, 242, 247, 0.7);
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-family: inherit;
+            color: var(--text);
+            transition: all var(--transition);
+            outline: none;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        .input-group input[type="date"] {
+            max-width: 200px;
+            padding: 10px 14px;
+            font-size: 15px;
+        }
+        .input-group input:focus,
+        .input-group textarea:focus {
+            background: rgba(255,255,255,0.9);
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.15);
+        }
+        .input-group textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        /* Переключатель режима - сегментированный контрол */
+        .segmented-control {
+            display: flex;
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+            padding: 3px;
+            margin-bottom: 14px;
+        }
+        .segmented-btn {
+            flex: 1;
+            padding: 10px 8px;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .segmented-btn.active {
+            background: white;
+            color: var(--text);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1), 0 0 0 0.5px rgba(0,0,0,0.04);
+        }
+
+        /* Секция */
+        .section {
+            display: none;
+            animation: fadeSlideIn 0.35s ease;
+        }
+        .section.active {
+            display: block;
+        }
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Заголовок секции чек-листа */
+        .checklist-section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin: 16px 0 8px;
+            padding-left: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .checklist-section-title::before {
+            content: '';
+            width: 4px;
+            height: 18px;
+            background: var(--blue);
+            border-radius: 2px;
+        }
+
+        /* Элемент чек-листа */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 13px 14px;
+            margin-bottom: 6px;
+            background: rgba(255,255,255,0.55);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition);
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        .checklist-item:active {
+            transform: scale(0.985);
+            background: rgba(255,255,255,0.75);
+        }
+        .checklist-item.checked {
+            background: rgba(52,199,89,0.1);
+            border-color: rgba(52,199,89,0.25);
+        }
+
+        /* Кастомный чекбокс */
+        .checkbox-custom {
+            width: 22px;
+            height: 22px;
+            border-radius: 7px;
+            border: 2px solid #C7C7CC;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+            background: white;
+        }
+        .checklist-item.checked .checkbox-custom {
+            background: var(--green);
+            border-color: var(--green);
+            animation: popIn 0.3s ease;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.7); }
+            60% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .checkbox-custom svg {
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+        .checklist-item.checked .checkbox-custom svg {
+            opacity: 1;
+        }
+        .checklist-item input[type="checkbox"] {
+            display: none;
+        }
+        .checklist-item .item-text {
+            flex: 1;
+            font-size: 15px;
+            line-height: 1.35;
+            color: var(--text);
+            transition: color var(--transition);
+        }
+        .checklist-item.checked .item-text {
+            color: #8E8E93;
+        }
+
+        /* Фото зона */
+        .photo-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1.5px dashed rgba(0,0,0,0.12);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            margin-bottom: 14px;
+        }
+        .photo-card:hover {
+            border-color: var(--blue);
+            background: rgba(0,122,255,0.04);
+        }
+        .photo-card:active {
+            transform: scale(0.98);
+        }
+        .photo-card .photo-icon {
+            font-size: 32px;
+            margin-bottom: 6px;
+        }
+        .photo-card .photo-label {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--blue);
+        }
+        .photo-card .photo-hint {
+            font-size: 12px;
+            color: var(--gray);
+            margin-top: 2px;
+        }
+        .photo-card input[type="file"] {
+            display: none;
+        }
+        .photo-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .photo-preview .preview-item {
+            width: 64px;
+            height: 64px;
+            border-radius: 10px;
+            object-fit: cover;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            animation: popIn 0.3s ease;
+        }
+
+        /* Кнопка отправки */
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--blue);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow: 0 4px 16px rgba(0,122,255,0.3);
+            letter-spacing: -0.2px;
+        }
+        .submit-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 8px rgba(0,122,255,0.2);
+        }
+        .submit-btn:disabled {
+            background: #AEAEB2;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Счетчик */
+        .counter {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray);
+            letter-spacing: 0.3px;
+        }
+        .counter .progress-ring {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            margin-right: 6px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Алерт в стиле iOS */
+        .ios-alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .ios-alert-overlay.show {
+            display: flex;
+        }
+        .ios-alert {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 20px;
+            padding: 24px 20px;
+            width: 85%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: alertIn 0.3s ease;
+        }
+        @keyframes alertIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .ios-alert h3 {
+            font-size: 18px;
+            margin-bottom: 6px;
+        }
+        .ios-alert p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 18px;
+            line-height: 1.4;
+        }
+        .ios-alert button {
+            width: 100%;
+            padding: 12px;
+            background: var(--blue);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .ios-alert button:active {
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-decoration"></div>
+    <div class="bg-decoration"></div>
+    <div class="bg-decoration"></div>
+
+    <div class="container">
+        <!-- Заголовок -->
+        <div class="header">
+            <div class="header-icon">📋</div>
+            <h1>Чек-лист смены</h1>
+            <div class="subtitle">Открытие и закрытие торговой точки</div>
+        </div>
+
+        <!-- Карточка с данными -->
+        <div class="card">
+            <div class="card-title">Данные точки</div>
+            <div class="input-group">
+                <label>🏪 Название точки</label>
+                <input type="text" id="storeName" placeholder="Например: QStore Тверская">
+            </div>
+            <div class="input-group">
+                <label>📅 Дата</label>
+                <input type="date" id="date">
+            </div>
+            <div class="input-group">
+                <label>👤 Фамилия сотрудника</label>
+                <input type="text" id="employeeName" placeholder="Введите фамилию">
+            </div>
+        </div>
+
+        <!-- Переключатель режима -->
+        <div class="segmented-control">
+            <button class="segmented-btn active" onclick="switchMode('opening')">🔓 Открытие</button>
+            <button class="segmented-btn" onclick="switchMode('closing')">🔒 Закрытие</button>
+        </div>
+
+        <!-- Секция открытия -->
+        <div id="opening-section" class="section active"></div>
+
+        <!-- Секция закрытия -->
+        <div id="closing-section" class="section"></div>
+
+        <!-- Комментарии -->
+        <div class="card" style="margin-top: 14px;">
+            <div class="card-title">💬 Комментарий</div>
+            <div class="input-group">
+                <textarea id="comments" rows="2" placeholder="Оставьте комментарий для следующей смены..."></textarea>
+            </div>
+        </div>
+
+        <!-- Фото -->
+        <div class="photo-card" onclick="document.getElementById('photoInput').click()">
+            <div class="photo-icon">📸</div>
+            <div class="photo-label">Добавить фото</div>
+            <div class="photo-hint">Можно выбрать несколько</div>
+            <input type="file" id="photoInput" multiple accept="image/*" onchange="handlePhotos(event)">
+            <div class="photo-preview" id="photoPreview"></div>
+        </div>
+
+        <!-- Кнопка -->
+        <button class="submit-btn" onclick="generateReport()">
+            📤 Отправить отчет
+        </button>
+
+        <!-- Счетчик -->
+        <div class="counter" id="counter">
+            <span class="progress-ring"></span>
+            <span id="counterText">Выполнено: 0 из 0</span>
+        </div>
+    </div>
+
+    <!-- Алерт -->
+    <div class="ios-alert-overlay" id="alertOverlay">
+        <div class="ios-alert">
+            <h3 id="alertTitle">✅ Отчет готов</h3>
+            <p id="alertMessage"></p>
+            <button onclick="closeAlert()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('date').valueAsDate = new Date();
+
+        let currentMode = 'opening';
+        let photos = [];
+
+        const openingChecklist = {
+            "Экстерьер": [
+                "Световая вывеска (QStore/Q Partner) работает",
+                "Пространство вокруг точки — чисто, опрятно",
+                "Внешние стеклянные элементы — чистые, без разводов и следов"
+            ],
+            "Интерьер — чистота и порядок": [
+                "Пол чистый",
+                "Столы и иное оборудование чистые и протертые",
+                "Выкладка соответствует рекомендациям по мерчандайзингу",
+                "Мусорные баки опустошены",
+                "Складское и подсобное помещения чистые",
+                "Неактуальные материалы (VM, TPOSM) вывезены на склад"
+            ],
+            "Команда": [
+                "Персонал соблюдает требования по внешнему виду (униформа, бейджи)",
+                "Персонал имеет паспорт и медицинскую книжку",
+                "Произведен Check-in в WFM и SF до начала смены"
+            ],
+            "Интерьер — техническое оснащение": [
+                "Кассовое оборудование работает, обеспечено кассовой лентой",
+                "Интернет, Wi-Fi и телефон работают",
+                "Принтер работает, обеспечен запас бумаги и чернил",
+                "Все осветительное оборудование работает",
+                "Торговое оборудование и фурнитура без повреждений"
+            ],
+            "Оборудование": [
+                "Все устройства (IQOS/LIL) полностью заряжены и почищены",
+                "Все системы для техники работают корректно"
+            ],
+            "Запас": [
+                "Произведен ежедневный пересчет (cycle count)",
+                "Оптимальный запас продажного стока обеспечен",
+                "Запас тестовых и подменных устройств (min 8 шт., из них min 4 LIL SOLID, статус RENT)",
+                "Запас печатных материалов и шаблонов документов обеспечен",
+                "Запас инструментов для чистки (палочки, щетки, шпатели, иглы, насадки)"
+            ],
+            "Сервисное обслуживание": [
+                "Проверены кейсы на длительную диагностику (наличие, информация, статус)",
+                "Проверены кейсы на независимую экспертизу (наличие, информация, статус)"
+            ],
+            "Заказы клиентов": [
+                "Определено наличие заказов C2C / C&C"
+            ]
+        };
+
+        const closingChecklist = {
+            "При закрытии": [
+                "Все клиенты покинули торговую точку",
+                "Двери закрыты"
+            ],
+            "Экстерьер": [
+                "Пространство вокруг точки — чисто",
+                "Внешние стеклянные элементы — чистые, без разводов и следов"
+            ],
+            "Интерьер — чистота и порядок": [
+                "Пол чистый",
+                "Столы и иное оборудование чистые и протертые",
+                "Мусорные баки опустошены",
+                "Складское и подсобное помещения чистые, порядок соблюден",
+                "Неактуальные материалы вывезены на склад / подготовлены к отправке"
+            ],
+            "Команда": [
+                "Касса и терминал — смена закрыта, чеки и ведомость опубликованы в Teams",
+                "Наличные деньги помещены в сейф или произведена инкассация",
+                "Произведен Check-out в WFM и Sales Force"
+            ],
+            "Интерьер — техническое оснащение": [
+                "Принтер и компьютер выключены",
+                "Система видеонаблюдения работает",
+                "Световые дисплеи и музыка выключены",
+                "Торговое оборудование и фурнитура без повреждений"
+            ],
+            "Оборудование": [
+                "Все устройства (IQOS/LIL) поставлены на зарядку",
+                "Планшеты персонала выключены и поставлены на зарядку"
+            ],
+            "Сервисное обслуживание": [
+                "Замены завершены в Sales Force, опубликованы в Teams, акты подписаны, устройства в сейф-пакете",
+                "Возвраты завершены в Sales Force и по кассе, подготовлены к отправке",
+                "Кейсы на длительную диагностику обработаны, информация передана следующей смене",
+                "Кейсы на независимую экспертизу обработаны, информация передана следующей смене"
+            ],
+            "После заполнения чек-листа": [
+                "Оставить комментарии для следующей смены (при необходимости)",
+                "Выключить всё световое оборудование",
+                "Активировать охранную сигнализацию",
+                "Покинуть торговую точку и закрыть дверь"
+            ]
+        };
+
+        function renderChecklist(data, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            for (const [section, items] of Object.entries(data)) {
+                const sectionTitle = document.createElement('div');
+                sectionTitle.className = 'checklist-section-title';
+                sectionTitle.textContent = section;
+                container.appendChild(sectionTitle);
+
+                items.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'checklist-item';
+                    div.onclick = function(e) {
+                        if (e.target.tagName === 'INPUT') return;
+                        const cb = this.querySelector('input[type="checkbox"]');
+                        cb.checked = !cb.checked;
+                        toggleItem(this, cb.checked);
+                    };
+                    div.innerHTML = `
+                        <input type="checkbox" id="${containerId}-${section}-${index}" onchange="toggleItem(this.parentElement, this.checked); event.stopPropagation();">
+                        <div class="checkbox-custom">
+                            <svg width="14" height="11" viewBox="0 0 14 11" fill="none">
+                                <path d="M1 5.5L5 9.5L13 1.5" stroke="white" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="item-text">${item}</span>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+        }
+
+        function toggleItem(element, isChecked) {
+            if (isChecked) {
+                element.classList.add('checked');
+            } else {
+                element.classList.remove('checked');
+            }
+            updateCounter();
+        }
+
+        function updateCounter() {
+            const activeSection = currentMode === 'opening' ? 'opening-section' : 'closing-section';
+            const allCheckboxes = document.querySelectorAll(`#${activeSection} input[type="checkbox"]`);
+            const checkedCount = document.querySelectorAll(`#${activeSection} input[type="checkbox"]:checked`).length;
+            document.getElementById('counterText').textContent = `Выполнено: ${checkedCount} из ${allCheckboxes.length}`;
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.segmented-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.segmented-btn')[mode === 'opening' ? 0 : 1].classList.add('active');
+
+            document.getElementById('opening-section').classList.toggle('active', mode === 'opening');
+            document.getElementById('closing-section').classList.toggle('active', mode === 'closing');
+            updateCounter();
+        }
+
+        function handlePhotos(event) {
+            const files = event.target.files;
+            const preview = document.getElementById('photoPreview');
+            preview.innerHTML = '';
+            photos = [];
+
+            for (let file of files) {
+                if (file.type.startsWith('image/')) {
+                    photos.push(file);
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'preview-item';
+                        preview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+
+        function showAlert(title, message) {
+            document.getElementById('alertTitle').textContent = title;
+            document.getElementById('alertMessage').textContent = message;
+            document.getElementById('alertOverlay').classList.add('show');
+        }
+
+        function closeAlert() {
+            document.getElementById('alertOverlay').classList.remove('show');
+        }
+
+        async function generateReport() {
+            const storeName = document.getElementById('storeName').value.trim();
+            const date = document.getElementById('date').value;
+            const employeeName = document.getElementById('employeeName').value.trim();
+            const comments = document.getElementById('comments').value.trim();
+
+            if (!storeName || !date || !employeeName) {
+                showAlert('⚠️ Не все поля заполнены', 'Пожалуйста, укажите название точки, дату и фамилию сотрудника.');
+                return;
+            }
+
+            const activeSection = currentMode === 'opening' ? 'opening-section' : 'closing-section';
+            const allCheckboxes = document.querySelectorAll(`#${activeSection} input[type="checkbox"]`);
+            const checkedCount = document.querySelectorAll(`#${activeSection} input[type="checkbox"]:checked`).length;
+
+            let reportText = `📋 *ОТЧЕТ ПО ЧЕК-ЛИСТУ*\n\n`;
+            reportText += `🏪 *Точка:* ${storeName}\n`;
+            reportText += `📅 *Дата:* ${date}\n`;
+            reportText += `👤 *Сотрудник:* ${employeeName}\n`;
+            reportText += `🕐 *Режим:* ${currentMode === 'opening' ? 'Открытие смены' : 'Закрытие смены'}\n`;
+            reportText += `✅ *Выполнено:* ${checkedCount} из ${allCheckboxes.length}\n\n`;
+            reportText += `📝 *Детали:*\n`;
+
+            let currentSection = '';
+            const sectionHeaders = document.querySelectorAll(`#${activeSection} .checklist-section-title`);
+            const items = document.querySelectorAll(`#${activeSection} .checklist-item`);
+
+            items.forEach((item, i) => {
+                // Находим ближайший заголовок секции перед этим элементом
+                let sectionName = '';
+                for (let j = sectionHeaders.length - 1; j >= 0; j--) {
+                    if (sectionHeaders[j].compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING) {
+                        sectionName = sectionHeaders[j].textContent;
+                        break;
+                    }
+                }
+                
+                if (sectionName !== currentSection) {
+                    currentSection = sectionName;
+                    reportText += `\n📌 *${currentSection}:*\n`;
+                }
+
+                const isChecked = item.classList.contains('checked');
+                const text = item.querySelector('.item-text').textContent;
+                reportText += `${isChecked ? '✅' : '❌'} ${text}\n`;
+            });
+
+            if (comments) {
+                reportText += `\n💬 *Комментарий:* ${comments}\n`;
+            }
+
+            // Скачиваем файл
+            const blob = new Blob([reportText.replace(/\*/g, '')], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const safeName = storeName.replace(/[^a-zA-Zа-яА-Я0-9]/g, '_');
+            a.download = `Отчет_${safeName}_${date}_${employeeName}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showAlert('✅ Отчет сформирован', `Файл сохранен.\n\n${reportText.replace(/\*/g, '')}`);
+        }
+
+        // Инициализация
+        renderChecklist(openingChecklist, 'opening-section');
+        renderChecklist(closingChecklist, 'closing-section');
+        updateCounter();
+    </script>
+</body>
+</html>
