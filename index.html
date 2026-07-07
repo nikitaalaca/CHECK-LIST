@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Чек-лист смены</title>
+    <!-- Подключаем библиотеку для PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.72);
@@ -620,7 +622,7 @@
     <script>
         // ============ НАСТРОЙКИ TELEGRAM ============
         const BOT_TOKEN = '8920306780:AAHSc7YbrF7nqiT9aSD59_31Fq-j8MKy4n0';
-        const CHAT_ID = '-1004308183842'; // Канал "Check" (@kpipulse)
+        const CHAT_ID = '-1004308183842';
         // ===========================================
 
         document.getElementById('date').valueAsDate = new Date();
@@ -844,66 +846,7 @@
             }
         }
 
-        async function sendToTelegram(text, photoFiles) {
-            const textUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-            
-            console.log('Отправка в канал:', CHAT_ID);
-            
-            const res = await fetch(textUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: CHAT_ID,
-                    text: text,
-                    parse_mode: 'HTML'
-                })
-            });
-
-            const data = await res.json();
-            
-            if (!res.ok) {
-                console.error('Ошибка Telegram:', data);
-                throw new Error(data.description || 'Ошибка отправки');
-            }
-
-            console.log('Текст отправлен в канал Check ✅');
-
-            if (photoFiles && photoFiles.length > 0) {
-                for (const photo of photoFiles) {
-                    const fd = new FormData();
-                    fd.append('chat_id', CHAT_ID);
-                    fd.append('photo', photo);
-                    
-                    const photoRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-                        method: 'POST',
-                        body: fd
-                    });
-                    
-                    if (!photoRes.ok) {
-                        const errData = await photoRes.json();
-                        console.warn('Ошибка отправки фото:', errData.description);
-                    }
-                }
-            }
-
-            return data;
-        }
-
-        function esc(s) {
-            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-        }
-
-        async function generateReport() {
-            const storeName = document.getElementById('storeName').value.trim();
-            const date = document.getElementById('date').value;
-            const employeeName = document.getElementById('employeeName').value.trim();
-            const comments = document.getElementById('comments').value.trim();
-
-            if (!storeName || !date || !employeeName) {
-                showAlert('⚠️ Не все поля заполнены', 'Укажите название точки, дату и фамилию.');
-                return;
-            }
-
+        function collectReportData() {
             const activeSection = currentMode === 'opening' ? 'opening-section' : 'closing-section';
             const items = document.querySelectorAll(`#${activeSection} .checklist-item`);
             const headers = document.querySelectorAll(`#${activeSection} .checklist-section-title`);
@@ -938,36 +881,222 @@
             });
             if (currentSec) sections.push(currentSec);
 
-            let msg = `<b>📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ</b>\n\n`;
-            msg += `<b>🏪 Точка:</b> ${esc(storeName)}\n`;
-            msg += `<b>📅 Дата:</b> ${esc(date)}\n`;
-            msg += `<b>👤 Сотрудник:</b> ${esc(employeeName)}\n`;
-            msg += `<b>🕐 Режим:</b> ${currentMode === 'opening' ? 'Открытие' : 'Закрытие'}\n`;
-            msg += `<b>✅ Выполнено:</b> ${checked} | <b>❌ Не выполнено:</b> ${unchecked} | <b>📊 Всего:</b> ${items.length}\n\n`;
-            msg += `<b>📝 Детали:</b>\n`;
+            return { sections, checked, unchecked, total: items.length };
+        }
 
-            sections.forEach(sec => {
-                msg += `\n<b>📌 ${esc(sec.title)}:</b>\n`;
+        // Генерация PDF через jsPDF
+        async function generatePDF(storeName, date, employeeName, comments, reportData) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+            // Поддержка кириллицы — используем встроенный шрифт
+            let y = 15;
+
+            // Заголовок
+            doc.setFontSize(18);
+            doc.setTextColor(0, 122, 255);
+            doc.text('ОТЧЕТ ПО ЧЕК-ЛИСТУ', 105, y, { align: 'center' });
+            y += 8;
+
+            // Линия
+            doc.setDrawColor(0, 122, 255);
+            doc.setLineWidth(0.5);
+            doc.line(15, y, 195, y);
+            y += 8;
+
+            // Информация
+            doc.setFontSize(12);
+            doc.setTextColor(28, 28, 30);
+            doc.text(`Точка: ${storeName}`, 15, y); y += 7;
+            doc.text(`Дата: ${date}`, 15, y); y += 7;
+            doc.text(`Сотрудник: ${employeeName}`, 15, y); y += 7;
+            doc.text(`Режим: ${currentMode === 'opening' ? 'Открытие смены' : 'Закрытие смены'}`, 15, y); y += 7;
+            doc.text(`Выполнено: ${reportData.checked} | Не выполнено: ${reportData.unchecked} | Всего: ${reportData.total}`, 15, y);
+            y += 10;
+
+            // Секции
+            reportData.sections.forEach(sec => {
+                // Проверяем, нужна ли новая страница
+                if (y > 260) {
+                    doc.addPage();
+                    y = 15;
+                }
+
+                doc.setFontSize(13);
+                doc.setTextColor(0, 122, 255);
+                doc.text(sec.title, 15, y);
+                y += 7;
+
                 sec.items.forEach(it => {
-                    let icon = '⬜';
-                    let extra = '';
-                    if (it.isChecked) icon = '✅';
-                    if (it.isUnchecked) {
-                        icon = '❌';
-                        if (it.reason) extra = ` — <i>${esc(it.reason)}</i>`;
+                    if (y > 270) {
+                        doc.addPage();
+                        y = 15;
                     }
-                    msg += `${icon} ${esc(it.text)}${extra}\n`;
+
+                    let icon = it.isChecked ? '[V]' : (it.isUnchecked ? '[X]' : '[ ]');
+                    let text = `${icon} ${it.text}`;
+                    if (it.isUnchecked && it.reason) {
+                        text += ` — Причина: ${it.reason}`;
+                    }
+
+                    doc.setFontSize(10);
+                    if (it.isChecked) {
+                        doc.setTextColor(52, 199, 89);
+                    } else if (it.isUnchecked) {
+                        doc.setTextColor(255, 59, 48);
+                    } else {
+                        doc.setTextColor(142, 142, 147);
+                    }
+
+                    // Разбиваем длинный текст на строки
+                    const maxWidth = 175;
+                    const lines = doc.splitTextToSize(text, maxWidth);
+                    lines.forEach(line => {
+                        if (y > 275) {
+                            doc.addPage();
+                            y = 15;
+                        }
+                        doc.text(line, 18, y);
+                        y += 5;
+                    });
+                    y += 1;
                 });
+                y += 4;
             });
 
-            if (comments) msg += `\n<b>💬 Комментарий:</b> ${esc(comments)}\n`;
+            // Комментарий
+            if (comments) {
+                if (y > 250) {
+                    doc.addPage();
+                    y = 15;
+                }
+                y += 4;
+                doc.setFontSize(12);
+                doc.setTextColor(28, 28, 30);
+                doc.text('Комментарий:', 15, y); y += 7;
+                doc.setFontSize(10);
+                doc.setTextColor(99, 99, 102);
+                const commentLines = doc.splitTextToSize(comments, 175);
+                commentLines.forEach(line => {
+                    if (y > 275) {
+                        doc.addPage();
+                        y = 15;
+                    }
+                    doc.text(line, 18, y);
+                    y += 5;
+                });
+            }
+
+            // Подвал
+            doc.setFontSize(8);
+            doc.setTextColor(142, 142, 147);
+            doc.text('EGORKIN DEV', 105, 288, { align: 'center' });
+
+            // Возвращаем PDF как Blob
+            return doc.output('blob');
+        }
+
+        async function sendToTelegram(headerText, pdfBlob, photoFiles) {
+            // 1. Отправляем шапку (краткое сообщение)
+            const textUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            const textRes = await fetch(textUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: headerText,
+                    parse_mode: 'HTML'
+                })
+            });
+
+            if (!textRes.ok) {
+                const err = await textRes.json();
+                throw new Error(err.description || 'Ошибка отправки сообщения');
+            }
+
+            // 2. Отправляем PDF
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            formData.append('document', pdfBlob, 'checklist_report.pdf');
+            formData.append('caption', '📎 Полный чек-лист в PDF');
+
+            const docRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!docRes.ok) {
+                const err = await docRes.json();
+                console.warn('Ошибка отправки PDF:', err.description);
+            }
+
+            // 3. Отправляем фото (если есть)
+            if (photoFiles && photoFiles.length > 0) {
+                for (const photo of photoFiles) {
+                    const fd = new FormData();
+                    fd.append('chat_id', CHAT_ID);
+                    fd.append('photo', photo);
+
+                    const photoRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                        method: 'POST',
+                        body: fd
+                    });
+
+                    if (!photoRes.ok) {
+                        const errData = await photoRes.json();
+                        console.warn('Ошибка отправки фото:', errData.description);
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        function esc(s) {
+            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        async function generateReport() {
+            const storeName = document.getElementById('storeName').value.trim();
+            const date = document.getElementById('date').value;
+            const employeeName = document.getElementById('employeeName').value.trim();
+            const comments = document.getElementById('comments').value.trim();
+
+            if (!storeName || !date || !employeeName) {
+                showAlert('⚠️ Не все поля заполнены', 'Укажите название точки, дату и фамилию.');
+                return;
+            }
+
+            const reportData = collectReportData();
+
+            // Шапка для Telegram (краткая)
+            let headerMsg = `<b>📋 ОТЧЕТ ПО ЧЕК-ЛИСТУ</b>\n\n`;
+            headerMsg += `<b>🏪 Точка:</b> ${esc(storeName)}\n`;
+            headerMsg += `<b>📅 Дата:</b> ${esc(date)}\n`;
+            headerMsg += `<b>👤 Сотрудник:</b> ${esc(employeeName)}\n`;
+            headerMsg += `<b>🕐 Режим:</b> ${currentMode === 'opening' ? 'Открытие' : 'Закрытие'}\n`;
+            headerMsg += `<b>📊 Статистика:</b>\n`;
+            headerMsg += `✅ Выполнено: ${reportData.checked}\n`;
+            headerMsg += `❌ Не выполнено: ${reportData.unchecked}\n`;
+            headerMsg += `📋 Всего пунктов: ${reportData.total}\n`;
+            
+            if (comments) {
+                headerMsg += `\n<b>💬 Комментарий:</b> ${esc(comments)}\n`;
+            }
+            
+            headerMsg += `\n📎 <i>Полный чек-лист в PDF-файле ниже</i>`;
 
             setLoading(true);
             try {
-                await sendToTelegram(msg, photos);
-                showAlert('✅ Отправлено!', `Отчет отправлен в канал Check!\n\n🏪 ${storeName}\n✅${checked} ❌${unchecked} 📊${items.length}`);
+                // Генерируем PDF
+                const pdfBlob = await generatePDF(storeName, date, employeeName, comments, reportData);
+                
+                // Отправляем в Telegram
+                await sendToTelegram(headerMsg, pdfBlob, photos);
+                
+                showAlert('✅ Отправлено!', `Шапка + PDF + фото отправлены в канал!\n\n🏪 ${storeName}\n✅${reportData.checked} ❌${reportData.unchecked} 📊${reportData.total}`);
             } catch (e) {
-                showAlert('❌ Ошибка', `${e.message}\n\nУбедитесь, что бот — администратор канала @kpipulse`);
+                showAlert('❌ Ошибка', `${e.message}`);
             } finally {
                 setLoading(false);
             }
